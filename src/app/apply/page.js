@@ -1,4 +1,4 @@
-import {MultiStepForm} from "@/components/MultiStepForm";
+import MultiStepForm from "@/components/MultiStepForm";
 
 export default function ApplyPage() {
   return (
