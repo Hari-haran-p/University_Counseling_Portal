@@ -1,4 +1,3 @@
-import { registrationSchema } from "@/lib/validators/registration";
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import bcrypt from "bcrypt";
@@ -20,7 +19,6 @@ export async function POST(req) {
         await client.query('BEGIN');
 
         const body = await req.json();
-        registrationSchema.parse(body);
 
         const randomPassword = generateRandomPassword();
         const hashedPassword = await bcrypt.hash(randomPassword, 10);
@@ -33,8 +31,8 @@ export async function POST(req) {
 
         const userValues = [body.email, hashedPassword];
         const userResult = await client.query(userQuery, userValues);
-        const userId = userResult.rows[0].id;  
- 
+        const userId = userResult.rows[0].id;
+
         const detailsQuery = `
       INSERT INTO personal_details (name, mobno, email, dob, gender, user_id)
       VALUES ($1, $2, $3, $4, $5, $6)
@@ -45,7 +43,7 @@ export async function POST(req) {
             body.email,
             body.dob,
             body.gender,
-            userId, 
+            userId,
         ];
         await client.query(detailsQuery, detailsValues);
 

@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { registrationSchema } from "@/lib/validators/registration";
+import { ClipLoader } from "react-spinners"; // Import ClipLoader
 
 export default function RegistrationPage() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function RegistrationPage() {
     mobile: "",
     email: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -30,8 +33,11 @@ export default function RegistrationPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
+      registrationSchema.parse(formData);
+
       const response = await axios.post("/api/registration", formData);
 
       if (response.status === 200) {
@@ -43,8 +49,17 @@ export default function RegistrationPage() {
         toast.error(response.data.message || "Registration failed. Please try again.");
       }
     } catch (error) {
+      if (error.name === "ZodError") {
+        const firstErrorMessage = error.errors[0].message;
+        toast.error(firstErrorMessage);
+      } else {
+        toast.error(
+          error.response?.data?.message || "An error occurred. Please try again."
+        );
+      }
       console.error("Registration error:", error);
-      toast.error(error.response?.data?.message || "An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -111,9 +126,14 @@ export default function RegistrationPage() {
 
           <Button
             type="submit"
-            className="w-full bg-primary-600 hover:bg-primary-700 text-white"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center" // Modified className
+            disabled={isLoading}
           >
-            Register
+            {isLoading ? (
+              <ClipLoader color="#ffffff" size={20} /> // Replace text with spinner
+            ) : (
+              "Register"
+            )}
           </Button>
         </form>
       </div>
