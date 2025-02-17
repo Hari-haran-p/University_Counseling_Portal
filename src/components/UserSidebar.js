@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, GraduationCap, User } from "lucide-react"
+import { LayoutDashboard, FileText, GraduationCap, User, Book } from "lucide-react"
 
 export function UserSidebar() {
   const pathname = usePathname()
@@ -10,6 +10,7 @@ export function UserSidebar() {
     { href: "/apply", label: "Apply", icon: FileText },
     { href: "/courses", label: "Courses", icon: GraduationCap },
     { href: "/profile", label: "Profile", icon: User },
+    { href: "/exam", label: "Take Exam", icon: Book }, // Added exam link
   ]
 
   return (

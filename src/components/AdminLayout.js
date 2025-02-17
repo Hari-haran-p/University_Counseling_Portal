@@ -1,7 +1,7 @@
 // import type { ReactNode } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, GraduationCap, FileText, Settings, LogOut, Menu, Bell, Search } from "lucide-react"
+import { LayoutDashboard, Users, GraduationCap, FileText, Settings, LogOut, Menu, Bell, Search, HelpCircle, BookCheck,  } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -90,7 +90,8 @@ function AdminSidebar() {
   const links = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/applications", label: "Applications", icon: FileText },
-    { href: "/admin/courses", label: "Courses", icon: GraduationCap },
+    { href: "/admin/questions", label: "Manage Questions", icon: BookCheck },
+    { href: "/admin/results", label: "View Exam Results", icon: HelpCircle }, 
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/settings", label: "Settings", icon: Settings },
   ]
