@@ -1,44 +1,40 @@
-import * as React from "react"
+import { Check, User, Book, CreditCard, FileSignature } from "lucide-react" //Import Icons
 import { cn } from "@/lib/utils"
 
-const Stepper = React.forwardRef(({ steps, currentStep, className, ...props }, ref) => {
+const stepIcons = [User, Book, CreditCard, FileSignature]; // Add the icons
+
+export function Stepper({ steps, currentStep, className }) {
   return (
-    <div ref={ref} className={cn("flex items-center justify-between", className)} {...props}>
-      {steps.map((step, index) => (
-        <React.Fragment key={step}>
-          <div className="flex flex-col items-center">
-            <div
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-full border-2",
-                index < currentStep
-                  ? "border-primary-800 bg-primary-800 text-primary-foreground"
-                  : index === currentStep
-                    ? "border-primary-800 text-primary-800"
-                    : "border-gray-300 text-gray-300",
+    <div className={cn("w-full", className)}>
+      <div className="flex items-center justify-between">
+        {steps.map((step, index) => {
+          const IconComponent = stepIcons[index]; // Get the icon component for the step
+          return (
+            <div key={step} className="flex-1 flex flex-col items-center text-center">
+              <div className="relative">
+                <div
+                  className={cn(
+                    "h-8 w-8 rounded-full border-2 flex items-center justify-center",
+                    index <= currentStep
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-muted bg-background",
+                  )}
+                >
+                  {index < currentStep ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <IconComponent className="h-4 w-4" />  // Show the right Icon
+                  )}
+                </div>
+                {/* <span className="absolute -bottom-6 text-sm break-words">{step}</span> */}
+              </div>
+              {index < steps.length - 1 && (
+                <div className="h-[2px] flex-1 bg-muted" />
               )}
-            >
-              {index < currentStep ? <CheckIcon className="h-5 w-5" /> : <span>{index + 1}</span>}
             </div>
-            <span className={cn("mt-2 text-xs", index <= currentStep ? "text-primary-800" : "text-gray-300")}>{step}</span>
-          </div>
-          {index < steps.length - 1 && (
-            <div className={cn("h-[2px] flex-1", index < currentStep ? "bg-primary-800" : "bg-gray-300")} />
-          )}
-        </React.Fragment>
-      ))}
+          );
+        })}
+      </div>
     </div>
-  )
-})
-
-// Stepper.displayName = "Stepper"
-
-function CheckIcon(props) {
-  return (
-    <svg {...props} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-    </svg>
-  )
+  );
 }
-
-export { Stepper }
-

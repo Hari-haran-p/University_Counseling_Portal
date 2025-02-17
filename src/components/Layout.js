@@ -1,7 +1,8 @@
-"use client"
-import { usePathname } from "next/navigation"
-import { LogOut, Menu, Bell, Search } from "lucide-react"
-import { Button } from "@/components/ui/button"
+"use client";
+
+import { useRouter } from "next/navigation";
+import { LogOut, Menu, Bell, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,14 +10,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { UserSidebar } from "./UserSidebar"
-// import { AdminSidebar } from "./admin-sidebar"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { UserSidebar } from "./UserSidebar";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Layout({ children }) {
-  const pathname = usePathname()
-  const isAdmin = pathname?.startsWith("/admin")
+  const router = useRouter();
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    router.push("/login");
+    toast.success("Logged out successfully!");
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -25,11 +31,12 @@ export default function Layout({ children }) {
         <div className="p-4">
           <h1 className="text-2xl font-bold">University Portal</h1>
         </div>
-        <nav className="flex-1 overflow-y-auto">{ <UserSidebar />}</nav>
+        <nav className="flex-1 overflow-y-auto">{<UserSidebar />}</nav>
         <div className="p-4">
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:text-primary-200 hover:bg-primary-700"
+            onClick={handleLogout} 
           >
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -47,7 +54,11 @@ export default function Layout({ children }) {
               </Button>
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input type="search" placeholder="Search..." className="pl-8 w-64" />
+                <Input
+                  type="search"
+                  placeholder="Search..."
+                  className="pl-8 w-64"
+                />
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -56,30 +67,45 @@ export default function Layout({ children }) {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <img src="/placeholder.svg?height=32&width=32" alt="User" className="rounded-full" />
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <img
+                      src="https://imgs.search.brave.com/XoCvQPCR8cwB92wTx6BVnT53TrDFDtYoR58BYS3mj6M/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTE5/NjA4Mzg2MS92ZWN0/b3Ivc2ltcGxlLW1h/bi1oZWFkLWljb24t/c2V0LmpwZz9zPTYx/Mng2MTImdz0wJms9/MjAmYz1hOGZ3ZFg2/VUtVVkNPZWROX3Aw/cFBzenU4QjRmNnNq/YXJEbVVHSG5ndmRN/PQ"
+                      alt="User"
+                      className="rounded-full object-cover"
+                    />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">John Doe</p>
-                      <p className="text-xs leading-none text-muted-foreground">john.doe@example.com</p>
+                      <p className="text-sm font-medium leading-none">
+                        John Doe
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        john.doe@example.com
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Log out</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>{" "}
+                  {/* Add onClick handler */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+          {children}
+        </main>
       </div>
     </div>
-  )
+  );
 }
-
