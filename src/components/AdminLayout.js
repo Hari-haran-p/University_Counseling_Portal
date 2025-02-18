@@ -88,9 +88,9 @@ function AdminSidebar() {
   const pathname = usePathname()
 
   const links = [
-    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/applications", label: "Applications", icon: FileText },
-    { href: "/admin/questions", label: "Manage Questions", icon: BookCheck },
+    { href: "/admin/exam", label: "Manage Exam", icon: BookCheck },
     { href: "/admin/results", label: "View Exam Results", icon: HelpCircle }, 
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/settings", label: "Settings", icon: Settings },

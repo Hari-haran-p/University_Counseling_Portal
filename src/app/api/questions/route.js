@@ -8,11 +8,11 @@ export async function GET() {
   let client;
   try {
     client = await pool.connect();
-    const query = "SELECT question_data FROM questions";
+    const query = "SELECT id, question_data FROM questions";
     const result = await client.query(query);
 
     const questions = result.rows.map((row) => ({
-      id: row.question_data.id,
+      id: row.id,
       ...row.question_data,
     }));
 

@@ -80,11 +80,11 @@ export async function PUT(req, { params }) {
 
 // DELETE: Delete a question
 export async function DELETE(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
   let client;
   try {
     client = await pool.connect();
-    const query = "DELETE FROM questions WHERE question_data ->> 'id' = $1";
+    const query = "DELETE FROM questions WHERE id = $1";
     const values = [id];
 
     const result = await client.query(query, values);
