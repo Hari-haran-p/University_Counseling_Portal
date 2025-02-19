@@ -1,13 +1,14 @@
-// app/api/login/route.js
-import { pool } from "@/lib/db";
+import { serialize } from 'cookie';
 import bcrypt from "bcrypt";
-import { generateToken } from "@/lib/tokenGeneration";
-import { NextResponse } from "next/server";
+import { generateToken } from '@/lib/auth';
+import { NextResponse } from 'next/server'; // Import NextResponse
+import { pool } from '@/db/db';
 
-export async function POST(req, res) {
+export async function POST(req) {
+  console.log("skjujgb");
+  
   try {
-    const body = await req.json();
-
+    const body = await req.json(); // Parse the request body
     const { username, password } = body;
 
     const client = await pool.connect();
@@ -18,7 +19,7 @@ export async function POST(req, res) {
 
     if (userResult.rows.length === 0) {
       client.release();
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      return new NextResponse(JSON.stringify({ message: "Invalid credentials" }), { status: 401, headers: { 'content-type': 'application/json' } }); // Use NextResponse
     }
 
     const user = userResult.rows[0];
@@ -27,17 +28,37 @@ export async function POST(req, res) {
 
     if (!passwordMatch) {
       client.release();
-      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
+      return new NextResponse(JSON.stringify({ message: "Invalid credentials" }), { status: 401, headers: { 'content-type': 'application/json' } });  // Use NextResponse
     }
 
     const payload = { userId: user.id, username: user.username, role: user.role };
     const token = generateToken(payload);
+    console.log(token);
+    
 
     client.release();
 
-    return NextResponse.json({ message: "Login successful", token: token }, { status: 200 });
+    // Set the cookie in the response headers
+    const serializedCookie = serialize('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60, // Expires in 1 hour
+      path: '/',
+    });
+
+    return new NextResponse( // Use NextResponse
+      JSON.stringify({ message: "Login successful" }),
+      {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+          'Set-Cookie': serializedCookie,  // Set the cookie in the response
+        },
+      }
+    );
   } catch (error) {
     console.error("Login error:", error);
-    return NextResponse.json({ message: "Login failed. Please try again." }, { status: 500 });
+    return new NextResponse(JSON.stringify({ message: "Login failed. Please try again." }), { status: 500, headers: { 'content-type': 'application/json' } }); // Use NextResponse
   }
 }

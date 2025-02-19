@@ -8,8 +8,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { loginSchema } from "@/lib/validators/login";
-import { ClipLoader } from "react-spinners"; // Import ClipLoader
+import { ClipLoader } from "react-spinners"; 
+import { loginSchema } from "../validators/login";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,8 +37,6 @@ export default function LoginPage() {
       const response = await axios.post("/api/login", formData);
 
       if (response.status === 200) {
-        localStorage.setItem("authToken", response.data.token);
-
         toast.success("Login successful!");
         router.push("/");
       } else {

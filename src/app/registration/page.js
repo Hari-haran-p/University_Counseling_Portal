@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { registrationSchema } from "@/lib/validators/registration";
+import { registrationSchema } from "@/app/validators/registration";
 import { ClipLoader } from "react-spinners"; // Import ClipLoader
 
 export default function RegistrationPage() {

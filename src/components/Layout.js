@@ -15,13 +15,27 @@ import { Input } from "@/components/ui/input";
 import { UserSidebar } from "./UserSidebar";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios"; // Import axios
 
 export default function Layout({ children }) {
   const router = useRouter();
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    router.push("/login");
-    toast.success("Logged out successfully!");
+
+  const handleLogout = async () => {
+    try {
+      // Make a request to the /api/logout endpoint
+      const response = await axios.post("/api/logout");
+
+      if (response.status === 200) {
+        // Redirect to the login page
+        router.push("/login");
+        toast.success("Logged out successfully!");
+      } else {
+        toast.error("Logout failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("An error occurred during logout.");
+    }
   };
 
   return (
@@ -36,7 +50,7 @@ export default function Layout({ children }) {
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:text-primary-200 hover:bg-primary-700"
-            onClick={handleLogout} 
+            onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -95,8 +109,7 @@ export default function Layout({ children }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     Log out
-                  </DropdownMenuItem>{" "}
-                  {/* Add onClick handler */}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

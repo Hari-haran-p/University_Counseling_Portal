@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { pool } from "@/db/db";
 import bcrypt from "bcrypt";
 import { sendEmail } from "@/lib/email";
 
