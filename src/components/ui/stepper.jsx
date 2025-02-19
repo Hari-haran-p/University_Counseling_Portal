@@ -16,7 +16,7 @@ export function Stepper({ steps, currentStep, className }) {
                   className={cn(
                     "h-8 w-8 rounded-full border-2 flex items-center justify-center",
                     index <= currentStep
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "border-primary-800 bg-primary-800 text-primary-foreground"
                       : "border-muted bg-background",
                   )}
                 >

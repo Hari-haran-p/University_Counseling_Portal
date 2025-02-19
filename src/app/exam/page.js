@@ -21,7 +21,8 @@ const ExamPage = () => {
     const [examEndTime, setExamEndTime] = useState(null); // Exam End Time
     const [timeRemaining, setTimeRemaining] = useState(0); // Exam Time remaining
     const [isLoading, setIsLoading] = useState(true); // Loading indicator
-    const [examScheduleId, setExamScheduleId] = useState(null)
+    const [examScheduleId, setExamScheduleId] = useState(null);
+    const [examStarted, setExamStarted] = useState(false); // New state for exam start
 
     const user = { id: 9 }; //REMOVE: Replace with your actual user ID retrieval mechanism
     const timerIntervalRef = useRef(null); // useRef to hold the interval ID
@@ -111,8 +112,7 @@ const ExamPage = () => {
                 }
                 setIsExamScheduled(true);
                 setExamEndTime(end);
-                fetchQuestions(); // Load questions only if all conditions are met
-
+                //fetchQuestions();
             } catch (error) {
                 console.error("Error checking readiness:", error);
                 alert("Failed to check exam readiness. Please try again later.");
@@ -120,23 +120,25 @@ const ExamPage = () => {
                 setIsLoading(false);  // Set loading to false
             }
         };
-        const fetchQuestions = async () => {
-            try {
-                const response = await axios.get("/api/questions");
-                setShuffledQuestions(response.data.sort(() => Math.random() - 0.5));
-                console.log(response.data.sort(() => Math.random() - 0.5));
-            } catch (error) {
-                console.error("Error fetching questions:", error);
-                alert("Failed to load questions.");
-            }
-        };
+
         checkReadiness();
 
     }, [user?.id]);
 
+    const fetchQuestions = async () => {
+        try {
+            const response = await axios.get("/api/questions");
+            setShuffledQuestions(response.data.sort(() => Math.random() - 0.5));
+            console.log(response.data.sort(() => Math.random() - 0.5));
+        } catch (error) {
+            console.error("Error fetching questions:", error);
+            alert("Failed to load questions.");
+        }
+    };
+
     //Timer useEffect
     useEffect(() => {
-        if (examEndTime) {
+        if (examEndTime && examStarted) {
             timerIntervalRef.current = setInterval(() => {
                 const now = new Date();
                 const timeLeft = examEndTime.getTime() - now.getTime();
@@ -152,7 +154,7 @@ const ExamPage = () => {
 
             return () => clearInterval(timerIntervalRef.current); // Cleanup on unmount
         }
-    }, [examEndTime]);
+    }, [examEndTime, examStarted]);
 
     const handleAnswer = (selectedAnswer) => {
         console.log(userAnswers);
@@ -168,6 +170,10 @@ const ExamPage = () => {
             finishExam();
         }
     };
+  const startExam = () => {
+    fetchQuestions(); // Load questions when exam is started
+    setExamStarted(true);
+  };
     const formatTime = (milliseconds) => {
         const totalSeconds = Math.floor(milliseconds / 1000);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -204,14 +210,8 @@ const ExamPage = () => {
         }
 
         let correctAnswersCount = 0;
-
-        // Calculate the number of correct answers based on userAnswers
-        Object.keys(userAnswers).forEach((questionId) => {
-            // Check if the current question is in the shuffledQuestions array
-            const question = shuffledQuestions.find((q) => q.id === questionId);
-
-            // If the question exists and the user's answer is correct, increment the count
-            if (question && userAnswers[questionId] === question.correctAnswer) {
+        shuffledQuestions.forEach((question) => {
+            if (userAnswers[question.id] === question.correctAnswer) {
                 correctAnswersCount++;
             }
         });
@@ -279,9 +279,24 @@ const ExamPage = () => {
             </div>
         );
     }
+
+    // Show "Start Exam" button before the exam is started
+    if (!examStarted) {
+        return (
+            <div className="container mx-auto py-10 text-center">
+                <h2 className="text-2xl font-bold mb-4">Ready to start the exam?</h2>
+                <p className="mb-4">Click the button below to begin.</p>
+                <Button onClick={startExam} className="bg-primary-800">
+                    Start Exam
+                </Button>
+            </div>
+        );
+    }
+
     if (shuffledQuestions.length === 0) {
         return <div className="container mx-auto py-10">Loading questions...</div>;
     }
+
     if (examFinished) {
         return (
             <div className="container mx-auto py-10">
@@ -293,6 +308,7 @@ const ExamPage = () => {
             </div>
         );
     }
+
     return (
         <div className="container mx-auto py-10">
             <h1 className="text-3xl font-bold mb-6">Exam</h1>

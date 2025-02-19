@@ -22,7 +22,10 @@ export async function POST(req, res) {
     }
 
     const user = userResult.rows[0];
+    const passs = await bcrypt.hash("12345678", 10);
 
+    console.log(passs);
+    
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {

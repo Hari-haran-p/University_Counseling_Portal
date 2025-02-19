@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, Menu, Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,26 +18,64 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Layout({ children }) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
+  const sidebarRef = useRef(null);  // Ref for the sidebar
+  const sidebarWidth = "64"; // The width of the sidebar in rem
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     router.push("/login");
     toast.success("Logged out successfully!");
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        isSidebarOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        window.innerWidth < 768 // Only trigger on mobile (adjust breakpoint as needed)
+      ) {
+        toggleSidebar();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);  // Use mousedown for better responsiveness
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside); // Remove the event listener on unmount
+    };
+  }, [isSidebarOpen]);
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col bg-primary-800 text-white">
+      <aside
+        ref={sidebarRef}  // Attach the ref to the sidebar
+        className={`
+          md:flex w-${sidebarWidth} flex-col bg-primary-800 text-white
+          fixed top-0 left-0 h-full z-50
+          transition-transform duration-300 transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0
+        `}
+      >
         <div className="p-4">
           <h1 className="text-2xl font-bold">University Portal</h1>
         </div>
-        <nav className="flex-1 overflow-y-auto">{<UserSidebar />}</nav>
+        <nav className="flex-1 overflow-y-auto">
+          {<UserSidebar toggleSidebar={toggleSidebar} />}
+        </nav>
         <div className="p-4">
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:text-primary-200 hover:bg-primary-700"
-            onClick={handleLogout} 
+            onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -45,11 +84,21 @@ export default function Layout({ children }) {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div
+        className={`
+          flex-1 flex flex-col overflow-hidden
+          ${`md:ml-64`}  // Add left margin on larger devices
+        `}
+      >
         <header className="bg-white shadow-sm">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={toggleSidebar}
+              >
                 <Menu className="h-6 w-6" />
               </Button>
               <div className="relative">
@@ -95,14 +144,13 @@ export default function Layout({ children }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     Log out
-                  </DropdownMenuItem>{" "}
-                  {/* Add onClick handler */}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
           {children}
         </main>
       </div>

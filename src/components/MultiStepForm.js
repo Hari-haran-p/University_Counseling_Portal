@@ -323,20 +323,20 @@ export default function MultiStepForm() {
   return (
     <div className="container mx-auto py-10">
       <Card className="max-w-4xl mx-auto">
-      <CardHeader className="border-b">
-  <div className="mb-12">
-    <Stepper steps={steps} currentStep={currentStep} />
-  </div>
-  <div className="flex flex-col w-full justify-between items-start">  {/* flex col and items-start */}
-    <div className="flex items-center justify-between w-full mb-2">
-      <h2 className="text-sm">Application Form</h2>
-      <p className="text-sm text-muted-foreground">
-        {Math.round(((currentStep + 1) / steps.length) * 100)}%
-      </p>
-    </div>
-    <Progress value={((currentStep + 1) / steps.length) * 100} className="h-2 w-full" /> {/* Progress bar */}
-  </div>
-</CardHeader>
+        <CardHeader className="border-b">
+          <div className="mb-12">
+            <Stepper steps={steps} currentStep={currentStep} />
+          </div>
+          <div className="flex flex-col w-full justify-between items-start">  {/* flex col and items-start */}
+            <div className="flex items-center justify-between w-full mb-2">
+              <h2 className="text-sm">Application Form</h2>
+              <p className="text-sm text-muted-foreground">
+                {Math.round(((currentStep + 1) / steps.length) * 100)}%
+              </p>
+            </div>
+            <Progress value={((currentStep + 1) / steps.length) * 100} className="h-2 w-full" /> {/* Progress bar */}
+          </div>
+        </CardHeader>
         {renderStepContent()}
         <CardFooter className="flex justify-between border-t p-6">
           <Button

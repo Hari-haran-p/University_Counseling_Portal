@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginSchema } from "@/lib/validators/login";
 import { ClipLoader } from "react-spinners"; // Import ClipLoader
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,7 +39,11 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         localStorage.setItem("authToken", response.data.token);
+        // Decode JWT and store user data in cookie
+        const decodedToken = JSON.parse(atob(response.data.token.split('.')[1]));
 
+        //set cookies with a day of expiring
+        Cookies.set('userData', JSON.stringify(decodedToken), { expires: 1 });
         toast.success("Login successful!");
         router.push("/");
       } else {
