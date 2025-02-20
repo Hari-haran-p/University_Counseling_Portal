@@ -3,7 +3,6 @@ import { jwtVerify } from "jose";
 import { parse } from "cookie";
 
 const PUBLIC_ROUTES = [
-  "/",
   "/login",
   "/api/login",
   "/registration",

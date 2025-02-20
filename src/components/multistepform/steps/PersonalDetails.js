@@ -13,11 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getPersonalDetailsData } from "@/services/personalDetailsService"; // Import API functions
+import { getPersonalDetailsData } from "@/services/personalDetailsService";
 import { toast } from "react-toastify";
-import {format} from "date-fns";
+import { format } from "date-fns";
 
-export function PersonalDetails({formData , setFormData}) {
+export function PersonalDetails({ formData, setFormData, errors, setErrors }) {
+  const [loading, setLoading] = useState(true); // Add a loading state
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -25,6 +26,9 @@ export function PersonalDetails({formData , setFormData}) {
       ...prevData,
       [id]: value,
     }));
+
+    // Clear error for the changed field
+    setErrors((prevErrors) => ({ ...prevErrors, [id]: undefined }));
   };
 
   const formatDate = (date) => {
@@ -37,20 +41,32 @@ export function PersonalDetails({formData , setFormData}) {
   };
 
   const loadPersonalDetails = async () => {
+    setLoading(true); // Set loading to true before fetching data
     try {
       const data = await getPersonalDetailsData();
-      // Format the date before setting the formData
       const formattedDob = data.dob ? formatDate(data.dob) : "";
       setFormData({ ...data, dob: formattedDob });
     } catch (error) {
       console.error("Failed to load personal details:", error);
-      toast.error("Failed to load personal details");
+      toast.error("Failed to load personal details. Please enter manually.");
+      // Do NOT set formData to empty. Let the form load with initial state.
+    } finally {
+      setLoading(false); // Set loading to false after fetching data
     }
   };
 
   useEffect(() => {
     loadPersonalDetails();
   }, []);
+
+  // Show a loading message while data is being fetched
+  if (loading) {
+    return (
+      <CardContent>
+        <p>Loading personal details...</p>
+      </CardContent>
+    );
+  }
 
   return (
     <>
@@ -67,6 +83,9 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.name || ""}
               onChange={handleChange}
             />
+            {errors.name && (
+              <p className="text-red-500 text-sm">{errors.name}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -77,6 +96,9 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.email || ""}
               onChange={handleChange}
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="mobno">Mobile Number</Label>
@@ -87,15 +109,21 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.mobno || ""}
               onChange={handleChange}
             />
+            {errors.mobno && (
+              <p className="text-red-500 text-sm">{errors.mobno}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
             <Input
               id="dob"
               type="date"
-              value={formData.dob || ""} // Use the formatted date
+              value={formData.dob || ""}
               onChange={handleChange}
             />
+            {errors.dob && (
+              <p className="text-red-500 text-sm">{errors.dob}</p>
+            )}
           </div>
         </div>
         <div className="space-y-2">
@@ -103,9 +131,10 @@ export function PersonalDetails({formData , setFormData}) {
           <RadioGroup
             defaultValue={formData.gender || "male"}
             className="flex space-x-4"
-            onValueChange={(value) =>
-              setFormData((prevData) => ({ ...prevData, gender: value }))
-            }
+            onValueChange={(value) => {
+              setFormData((prevData) => ({ ...prevData, gender: value }));
+              setErrors((prevErrors) => ({ ...prevErrors, gender: undefined })); // Clear error
+            }}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="male" id="male" />
@@ -116,17 +145,24 @@ export function PersonalDetails({formData , setFormData}) {
               <Label htmlFor="female">Female</Label>
             </div>
           </RadioGroup>
+          {errors.gender && (
+            <p className="text-red-500 text-sm">{errors.gender}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Religion</Label>
           <Select
             value={formData.religion || ""}
-            onValueChange={(value) =>
+            onValueChange={(value) => {
               setFormData((prevData) => ({
                 ...prevData,
                 religion: value,
-              }))
-            }
+              }));
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                religion: undefined,
+              }));
+            }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select religion" />
@@ -138,6 +174,9 @@ export function PersonalDetails({formData , setFormData}) {
               <SelectItem value="others">Others</SelectItem>
             </SelectContent>
           </Select>
+          {errors.religion && (
+            <p className="text-red-500 text-sm">{errors.religion}</p>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -148,6 +187,9 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.parent_name || ""}
               onChange={handleChange}
             />
+            {errors.parent_name && (
+              <p className="text-red-500 text-sm">{errors.parent_name}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="parent_mobno">Parent/Guardian Mobile</Label>
@@ -158,6 +200,9 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.parent_mobno || ""}
               onChange={handleChange}
             />
+            {errors.parent_mobno && (
+              <p className="text-red-500 text-sm">{errors.parent_mobno}</p>
+            )}
           </div>
         </div>
         <div className="space-y-2">
@@ -168,6 +213,9 @@ export function PersonalDetails({formData , setFormData}) {
             value={formData.address1 || ""}
             onChange={handleChange}
           />
+          {errors.address1 && (
+            <p className="text-red-500 text-sm">{errors.address1}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="address2">Address Line 2</Label>
@@ -177,6 +225,9 @@ export function PersonalDetails({formData , setFormData}) {
             value={formData.address2 || ""}
             onChange={handleChange}
           />
+          {errors.address2 && (
+            <p className="text-red-500 text-sm">{errors.address2}</p>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
@@ -187,14 +238,18 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.pincode || ""}
               onChange={handleChange}
             />
+            {errors.pincode && (
+              <p className="text-red-500 text-sm">{errors.pincode}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>State</Label>
             <Select
               value={formData.state || ""}
-              onValueChange={(value) =>
-                setFormData((prevData) => ({ ...prevData, state: value }))
-              }
+              onValueChange={(value) => {
+                setFormData((prevData) => ({ ...prevData, state: value }));
+                setErrors((prevErrors) => ({ ...prevErrors, state: undefined }));
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select state" />
@@ -205,6 +260,9 @@ export function PersonalDetails({formData , setFormData}) {
                 <SelectItem value="kl">Kerala</SelectItem>
               </SelectContent>
             </Select>
+            {errors.state && (
+              <p className="text-red-500 text-sm">{errors.state}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
@@ -214,6 +272,9 @@ export function PersonalDetails({formData , setFormData}) {
               value={formData.city || ""}
               onChange={handleChange}
             />
+            {errors.city && (
+              <p className="text-red-500 text-sm">{errors.city}</p>
+            )}
           </div>
         </div>
         <div className="space-y-2">
@@ -224,6 +285,9 @@ export function PersonalDetails({formData , setFormData}) {
             value={formData.community || ""}
             onChange={handleChange}
           />
+          {errors.community && (
+            <p className="text-red-500 text-sm">{errors.community}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="mother_tongue">Mother Tongue</Label>
@@ -233,6 +297,9 @@ export function PersonalDetails({formData , setFormData}) {
             value={formData.mother_tongue || ""}
             onChange={handleChange}
           />
+          {errors.mother_tongue && (
+            <p className="text-red-500 text-sm">{errors.mother_tongue}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="native_state">Native State</Label>
@@ -242,6 +309,9 @@ export function PersonalDetails({formData , setFormData}) {
             value={formData.native_state || ""}
             onChange={handleChange}
           />
+          {errors.native_state && (
+            <p className="text-red-500 text-sm">{errors.native_state}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="district">District</Label>
@@ -251,6 +321,9 @@ export function PersonalDetails({formData , setFormData}) {
             value={formData.district || ""}
             onChange={handleChange}
           />
+          {errors.district && (
+            <p className="text-red-500 text-sm">{errors.district}</p>
+          )}
         </div>
       </CardContent>
     </>

@@ -1,3 +1,4 @@
+// src/components/declaration-details/DeclarationDetails.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,8 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
 
-export function DeclarationDetails({ formData, setFormData }) {
-  
+export function DeclarationDetails({
+  formData,
+  setFormData,
+  errors,
+  setErrors,
+}) {
   const [originalPhotoUrl, setOriginalPhotoUrl] = useState(null);
   const [originalSignatureUrl, setOriginalSignatureUrl] = useState(null);
 
@@ -32,23 +37,26 @@ export function DeclarationDetails({ formData, setFormData }) {
 
   const handleFileChange = (event, type) => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+      setFormData((prevData) => ({ ...prevData, [type]: null })); // Clear file if no file selected
+      setErrors((prevErrors) => ({ ...prevErrors, [type]: undefined })); // Clear error on removal
+      return;
+    }
 
     setFormData((prevData) => {
+      const updatedData = { ...prevData };
       if (type === "photo") {
-        return {
-          ...prevData,
-          photo: file,
-          photoPreview: URL.createObjectURL(file),
-        };
+        updatedData.photo = file;
+        updatedData.photoPreview = URL.createObjectURL(file);
       } else {
-        return {
-          ...prevData,
-          signature: file,
-          signaturePreview: URL.createObjectURL(file),
-        };
+        updatedData.signature = file;
+        updatedData.signaturePreview = URL.createObjectURL(file);
       }
+      return updatedData;
     });
+
+    // Clear error on new file selection
+    setErrors((prevErrors) => ({ ...prevErrors, [type]: undefined }));
   };
 
   const handleDeclarationChange = (e) => {
@@ -72,6 +80,9 @@ export function DeclarationDetails({ formData, setFormData }) {
             accept="image/*"
             onChange={(e) => handleFileChange(e, "photo")}
           />
+          {errors.photo && (
+            <p className="text-red-500 text-sm">{errors.photo}</p>
+          )}
           <p className="text-sm text-muted-foreground">
             Upload a recent passport size photograph
           </p>
@@ -97,6 +108,9 @@ export function DeclarationDetails({ formData, setFormData }) {
             accept="image/*"
             onChange={(e) => handleFileChange(e, "signature")}
           />
+          {errors.signature && (
+            <p className="text-red-500 text-sm">{errors.signature}</p>
+          )}
           <p className="text-sm text-muted-foreground">
             Upload a scanned copy of your signature
           </p>
@@ -125,6 +139,7 @@ export function DeclarationDetails({ formData, setFormData }) {
             <input
               type="checkbox"
               id="declaration"
+              required
               className="h-4 w-4 rounded border-gray-300"
               checked={formData.declaration || false}
               onChange={handleDeclarationChange}

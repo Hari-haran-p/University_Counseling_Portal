@@ -17,6 +17,10 @@ import { savePersonalDetailsData } from "@/services/personalDetailsService";
 import { saveEducationalDetailsData } from "@/services/educationalDetailsService";
 import { uploadFiles } from "@/services/declarationDetailsService";
 import { useRouter } from "next/navigation";
+import { personalDetailsSchema } from "@/app/validators/personalDetailsSchema";
+import { educationalDetailsSchema } from "@/app/validators/educationalDetailsSchema";
+import { declarationDetailsSchema } from "@/app/validators/declarationDetailsSchema";
+import { z } from "zod"; // Make sure Zod is imported
 
 const steps = [
   "Personal Details",
@@ -61,31 +65,62 @@ export default function MultiStepForm() {
     existingPhotoUrl: null,
     existingSignatureUrl: null,
   });
-
+  const [errors, setErrors] = useState({});
   const router = useRouter();
 
+  const validateStep = (step) => {
+    try {
+      switch (step) {
+        case 0:
+          personalDetailsSchema.parse(formData);
+          break;
+        case 1:
+          educationalDetailsSchema.parse(formData);
+          break;
+        case 3:
+          declarationDetailsSchema.parse(formData);
+          break;
+        default:
+          return true; // No validation for payment details
+      }
+      setErrors({}); // Clear previous errors
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const firstError = error.errors[0]; // Get the first validation error
+        const errorMessage = `${firstError.message}`;
+        setErrors({ [firstError.path[0]]: firstError.message }); // Store only the first error
+        toast.error(errorMessage); // Show only one error at a time
+      } else {
+        console.error("Validation Error:", error);
+        toast.error("An unexpected validation error occurred.");
+      }
+      return false;
+    }
+  };
+
   const renderStepContent = useCallback(() => {
+    const sharedProps = { formData, setFormData, errors, setErrors };
     switch (currentStep) {
       case 0:
-        return (
-          <PersonalDetails formData={formData} setFormData={setFormData} />
-        );
+        return <PersonalDetails {...sharedProps} />;
       case 1:
-        return (
-          <EducationalDetails formData={formData} setFormData={setFormData} />
-        );
+        return <EducationalDetails {...sharedProps} />;
       case 2:
-        return <PaymentDetails formData={formData} setFormData={setFormData} />;
+        return <PaymentDetails {...sharedProps} />;
       case 3:
-        return (
-          <DeclarationDetails formData={formData} setFormData={setFormData} />
-        );
+        return <DeclarationDetails {...sharedProps} />;
       default:
         return null;
     }
-  }, [currentStep, formData, setFormData]);
+  }, [currentStep, formData, errors, setFormData, setErrors]);
 
   const handleNext = async () => {
+    if (!validateStep(currentStep)) {
+      console.log("Please correct the errors on this page.");
+      return;
+    }
+
     try {
       setIsLoading(true);
 
@@ -126,6 +161,10 @@ export default function MultiStepForm() {
   };
 
   const handleSubmit = async () => {
+    if (!validateStep(currentStep)) {
+      console.log("Please correct the errors on this page.");
+      return;
+    }
     try {
       setIsLoading(true);
 

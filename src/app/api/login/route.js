@@ -46,21 +46,21 @@ export async function POST(req) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60, // Expires in 1 hour
+      maxAge: 60 * 60,
       path: '/',
     });
 
     return new NextResponse( // Use NextResponse
-      JSON.stringify({ message: "Login successful",role:user.role }),
+      JSON.stringify({ message: "Login successful", userData : user }),
       {
         status: 200,
         headers: {
           'content-type': 'application/json',
-          'Set-Cookie': serializedCookie, 
+          'Set-Cookie': serializedCookie,
         },
-        
       }
     );
+
   } catch (error) {
     console.error("Login error:", error);
     return new NextResponse(JSON.stringify({ message: "Login failed. Please try again." }), { status: 500, headers: { 'content-type': 'application/json' } }); // Use NextResponse
