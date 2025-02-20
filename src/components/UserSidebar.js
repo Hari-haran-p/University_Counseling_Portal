@@ -1,14 +1,16 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, GraduationCap, User } from "lucide-react"
+import { LayoutDashboard, FileText, User, Book, Ticket, HelpCircle } from "lucide-react"
 
-export function UserSidebar() {
+export function UserSidebar({ toggleSidebar }) {  // Receive toggleSidebar as a prop
   const pathname = usePathname()
 
   const links = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/apply", label: "Apply", icon: FileText },
-    { href: "/courses", label: "Courses", icon: GraduationCap },
+    { href: "/hallticket", label: "Hall Ticket", icon: Ticket },
+    { href: "/exam", label: "Take Exam", icon: Book },
+    { href: "/results", label: "View Exam Results", icon: HelpCircle },
     { href: "/profile", label: "Profile", icon: User },
   ]
 
@@ -18,6 +20,7 @@ export function UserSidebar() {
         <li key={link.href}>
           <Link
             href={link.href}
+            onClick={toggleSidebar}  // Call toggleSidebar on link click
             className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg ${
               pathname === link.href
                 ? "bg-primary-700 text-white"
@@ -32,4 +35,3 @@ export function UserSidebar() {
     </ul>
   )
 }
-

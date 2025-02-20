@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { ClipLoader } from "react-spinners"; 
+import { ClipLoader } from "react-spinners";
 import { loginSchema } from "../validators/login";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,7 +38,9 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         toast.success("Login successful!");
-        router.push("/");
+        const role = response.data.role;
+        if (role === "admin") router.push("/admin");
+        if (role === "user") router.push("/");
       } else {
         toast.error(response.data.message || "Login failed. Please try again.");
       }

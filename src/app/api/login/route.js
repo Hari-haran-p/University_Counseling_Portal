@@ -23,7 +23,10 @@ export async function POST(req) {
     }
 
     const user = userResult.rows[0];
+    // const passs = await bcrypt.hash("12345678", 10);
 
+    // console.log(passs);
+    
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
@@ -48,13 +51,14 @@ export async function POST(req) {
     });
 
     return new NextResponse( // Use NextResponse
-      JSON.stringify({ message: "Login successful" }),
+      JSON.stringify({ message: "Login successful",role:user.role }),
       {
         status: 200,
         headers: {
           'content-type': 'application/json',
-          'Set-Cookie': serializedCookie,  // Set the cookie in the response
+          'Set-Cookie': serializedCookie, 
         },
+        
       }
     );
   } catch (error) {

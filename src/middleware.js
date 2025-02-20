@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { parse } from "cookie";
 
-const PUBLIC_ROUTES = ["/", "/login", "/api/login", "/registration", "/api/registration", "/api/logout"];
-const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET || "your_secret_key"); // Use TextEncoder for Edge compatibility
+const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/api/login",
+  "/registration",
+  "/api/registration",
+  "/api/logout",
+];
+const SECRET_KEY = new TextEncoder().encode(
+  process.env.JWT_SECRET || "your_secret_key"
+); // Use TextEncoder for Edge compatibility
 
 export async function middleware(req) {
   const { pathname } = req.nextUrl;
@@ -28,7 +37,9 @@ export async function middleware(req) {
   try {
     // Verify token using `jose`
     const { payload } = await jwtVerify(token, SECRET_KEY);
-    console.log(`[Middleware] Token decoded successfully: User ID - ${payload.userId}, Role - ${payload.role}`);
+    console.log(
+      `[Middleware] Token decoded successfully: User ID - ${payload.userId}, Role - ${payload.role}`
+    );
 
     // Restrict access to /admin routes
     if (pathname.startsWith("/admin")) {
@@ -38,6 +49,7 @@ export async function middleware(req) {
         return NextResponse.redirect(new URL("/", req.url));
       }
       console.log("[Middleware] User is admin, access granted.");
+      // return NextResponse.redirect(new URL("/admin", req.url));
     }
 
     // Clone request headers and attach user data

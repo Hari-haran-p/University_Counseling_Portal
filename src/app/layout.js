@@ -13,20 +13,29 @@ const inter = Inter({ subsets: ["latin"] });
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const [isAdminRoute, setIsAdminRoute] = useState(false);
+  const [isLoginRoute, setIsLoginRoute] = useState(false);
 
   useEffect(() => {
     setIsAdminRoute(pathname?.startsWith("/admin") || false);
+    setIsLoginRoute(pathname?.startsWith("/login") || false);
   }, [pathname]);
+
+
 
   return (
     <html lang="en">
       <body className={inter.className}>
         <ToastContainer />
-        {isAdminRoute ? (
-          <AdminLayout>{children}</AdminLayout>
-        ) : (
-          <Layout>{children}</Layout>
-        )}
+        {isLoginRoute
+          ?
+          children
+          :
+          isAdminRoute ? (
+            <AdminLayout>{children}</AdminLayout>
+          ) : (
+            <Layout>{children}</Layout>
+          )
+        }
       </body>
     </html>
   );

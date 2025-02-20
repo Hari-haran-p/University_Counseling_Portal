@@ -80,3 +80,37 @@
   }
 }
 
+
+/*For the entire app scroll bar
+*/
+
+/* For WebKit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 2px; /* Adjust the width as needed */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Color of the tracking area */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1; /* Color of the scroll thumb */
+  border-radius: 2px;
+  width: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #888; /* Color on hover */
+}
+
+/* For Firefox */
+/*The color is hard to style in firefox
+*/
+/*Style the table for it */
+/*There are other ways to style the scroll bar for firefox such as javascript
+*/
+/*For now using default */
+/*
+scrollbar-width: thin;
+  scrollbar-color: blue orange;
+*/
