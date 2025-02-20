@@ -149,6 +149,7 @@ function AdminSidebar({ toggleSidebar }) {  //Recieve toggle side bar function h
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/exam", label: "Manage Exam", icon: BookCheck },
     { href: "/admin/results", label: "View Exam Results", icon: HelpCircle },
+    { href: "/admin/counseling", label: "Counseling", icon: FileText }, // ADDED counseling
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/settings", label: "Settings", icon: Settings },
   ]

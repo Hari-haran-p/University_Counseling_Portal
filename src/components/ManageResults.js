@@ -196,9 +196,9 @@ const ManageResults = () => {
                 mode="single"
                 selected={publishDate ? parseISO(publishDate) : undefined}
                 onSelect={handlePublishDateChange}
-                disabled={(date) =>
-                  date < new Date() || date < new Date("2024-01-01")
-                }
+                // disabled={(date) =>
+                //   date <= new Date() || date <= new Date("2024-01-01")
+                // }
                 initialFocus
               />
             </PopoverContent>
