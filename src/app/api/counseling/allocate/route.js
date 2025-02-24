@@ -109,7 +109,7 @@ export async function POST(req) {
                                 console.error(`Failed to assign seat to user ${student.user_id} in department ${preferredDepartmentId}:`, assignError);
                             }
 
-                            break; // Move to the next student
+                            break;
                         }
                     }
 
