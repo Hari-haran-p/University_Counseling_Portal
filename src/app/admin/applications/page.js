@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, X, Eye, EditIcon, ArrowUp, ArrowDown } from "lucide-react";
+import { Loader2, X, Eye, ArrowUp, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -32,21 +32,65 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 
-const AdminUsersPage = () => {
+const AdminApplicationPage = () => {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedUserData, setEditedUserData] = useState({});
-  const [originalUserData, setOriginalUserData] = useState({}); // Store original user data
-  const [isSaving, setIsSaving] = useState(false);
+  const [originalUserData, setOriginalUserData] = useState({});
+  const [isSaving, setIsSaving] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [viewingUser, setViewingUser] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState("asc"); // "asc" or "desc"
+  const [sortDirection, setSortDirection] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10); // Default rows per page
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const allColumnNames = [
+    "user_id",
+    "username",
+    "role",
+    "name",
+    "mobno",
+    "email",
+    "dob",
+    "gender",
+    "religion",
+    "community",
+    "mother_tongue",
+    "native_state",
+    "parent_name",
+    "parent_mobno",
+    "personal_pincode",
+    "personal_state",
+    "personal_district",
+    "address1",
+    "address2",
+    "personal_city",
+    "board_name",
+    "school_name",
+    "medium",
+    "educational_pincode",
+    "educational_state",
+    "educational_district",
+    "educational_address",
+    "educational_city",
+    "month_passout",
+    "year_passout",
+    "declaration",
+  ];
+  // Default rows per page
+  const [columnVisibility, setColumnVisibility] = useState(() => {
+    const initialVisibility = {};
+    allColumnNames.forEach((column) => {
+      initialVisibility[column] = true; // Initially all true (visible)
+    });
+    return initialVisibility;
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -69,7 +113,7 @@ const AdminUsersPage = () => {
     setEditingUserId(userId);
     const userToEdit = users.find((user) => user.user_id === userId);
     setEditedUserData(userToEdit);
-    setOriginalUserData(userToEdit); // Store the original data
+    setOriginalUserData(userToEdit);
     setIsSidebarOpen(true);
   };
 
@@ -88,7 +132,6 @@ const AdminUsersPage = () => {
   const handleSave = async () => {
     setIsSaving(true);
 
-    // Check if any changes were made
     const hasChanges =
       JSON.stringify(editedUserData) !== JSON.stringify(originalUserData);
 
@@ -101,13 +144,13 @@ const AdminUsersPage = () => {
 
     try {
       await axios.put(`/api/admin/users/${editingUserId}`, editedUserData);
-      toast.success("User data updated successfully!"); // Show success message as toast
+      toast.success("User data updated successfully!");
       setEditingUserId(null);
       setIsSidebarOpen(false);
       fetchUsers();
     } catch (error) {
       console.error("Error updating user data:", error);
-      toast.error("Failed to update user data."); // Show error message as toast
+      toast.error("Failed to update user data.");
     } finally {
       setIsSaving(false);
     }
@@ -145,41 +188,6 @@ const AdminUsersPage = () => {
     setCurrentPage(1); // Reset page on rows per page change
   };
 
-  const columnNames = ["user_id", "username", "role", "name", "email", "mobno"];
-
-  const allColumnNames = [
-    "user_id",
-    "username",
-    "role",
-    "name",
-    "mobno",
-    "email",
-    "dob",
-    "gender",
-    "religion",
-    "community",
-    "mother_tongue",
-    "native_state",
-    "parent_name",
-    "parent_mobno",
-    "personal_pincode",
-    "personal_state",
-    "personal_district",
-    "address1",
-    "address2",
-    "personal_city",
-    "board_name",
-    "school_name",
-    "medium",
-    "educational_pincode",
-    "educational_state",
-    "educational_district",
-    "educational_address",
-    "educational_city",
-    "month_passout",
-    "year_passout",
-  ];
-
   const formatColumnHeader = (header) => {
     const words = header.split("_");
     const capitalizedWords = words.map(
@@ -192,20 +200,23 @@ const AdminUsersPage = () => {
     let filtered = users;
     if (searchQuery) {
       filtered = users.filter((user) => {
-        return allColumnNames.some((column) => {
-          const value = user[column];
-          if (value) {
-            return String(value)
-              .toLowerCase()
-              .trim() // Add trim() here
-              .includes(searchQuery.toLowerCase());
-          }
-          return false;
-        });
+        return allColumnNames
+          .filter((column) => columnVisibility[column])
+          .some((column) => {
+            // Only search visible columns
+            const value = user[column];
+            if (value) {
+              return String(value)
+                .toLowerCase()
+                .trim()
+                .includes(searchQuery.toLowerCase());
+            }
+            return false;
+          });
       });
     }
 
-    if (sortColumn) {
+    if (sortColumn && columnVisibility[sortColumn]) {
       filtered = [...filtered].sort((a, b) => {
         const aValue = a[sortColumn];
         const bValue = b[sortColumn];
@@ -227,7 +238,7 @@ const AdminUsersPage = () => {
     }
 
     return filtered;
-  }, [users, searchQuery, sortColumn, sortDirection]);
+  }, [users, searchQuery, sortColumn, sortDirection, columnVisibility]);
 
   const totalPages = Math.ceil(sortedAndFilteredUsers.length / rowsPerPage);
 
@@ -237,12 +248,84 @@ const AdminUsersPage = () => {
     return sortedAndFilteredUsers.slice(startIndex, endIndex);
   }, [sortedAndFilteredUsers, currentPage, rowsPerPage]);
 
+  const usersToShow = useMemo(() => {
+    return paginatedUsers.filter((user) => user.role === "user");
+  }, [paginatedUsers]);
+
+  // Column Visibility Handling
+  const handleColumnToggle = (column) => {
+    setColumnVisibility((prevVisibility) => ({
+      ...prevVisibility,
+      [column]: !prevVisibility[column],
+    }));
+  };
+
+  // Export Functions
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const visibleColumns = allColumnNames.filter(
+      (column) => columnVisibility[column]
+    );
+    const columnGroups = [];
+    const columnsPerPage = 5;
+
+    for (let i = 0; i < visibleColumns.length; i += columnsPerPage) {
+      columnGroups.push(visibleColumns.slice(i, i + columnsPerPage));
+    }
+
+    columnGroups.forEach((group, groupIndex) => {
+      const headers = group.map((column) => formatColumnHeader(column));
+      const tableData = usersToShow.map((item) => {
+        const row = [];
+        group.forEach((column) => {
+          row.push(item[column]);
+        });
+        return row;
+      });
+
+      doc.autoTable({
+        head: [headers],
+        body: tableData,
+        startY: groupIndex === 0 ? 10 : doc.previousAutoTable.finalY + 10, // Start Y position
+        margin: { horizontal: 10 },
+        showHead: "everyPage",
+      });
+
+      if (groupIndex < columnGroups.length - 1) {
+        doc.addPage();
+      }
+    });
+
+    doc.save("user_data.pdf");
+  };
+
+  const exportToExcel = () => {
+    const visibleColumns = allColumnNames.filter(
+      (column) => columnVisibility[column]
+    );
+    const headers = visibleColumns.map((column) => formatColumnHeader(column));
+
+    const tableData = usersToShow.map((item) => {
+      const row = {};
+      visibleColumns.forEach((column) => {
+        row[formatColumnHeader(column)] = item[column];
+      });
+      return row;
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(tableData, { header: headers });
+
+    XLSX.utils.book_append_sheet(wb, ws, "Users");
+    XLSX.writeFile(wb, "user_data.xlsx");
+  };
+
   return (
     <div className="container mx-auto py-10 px-4">
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">
-            Admin - User Management
+            Admin - Application Management
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -254,20 +337,66 @@ const AdminUsersPage = () => {
               onChange={handleSearch}
               className="w-1/3"
             />
-            <Select
-              onValueChange={handleRowsPerPageChange}
-              defaultValue={String(rowsPerPage)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Rows per Page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5 Rows</SelectItem>
-                <SelectItem value="10">10 Rows</SelectItem>
-                <SelectItem value="20">20 Rows</SelectItem>
-                <SelectItem value="50">50 Rows</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex space-x-2 items-center">
+              <Select
+                onValueChange={handleRowsPerPageChange}
+                defaultValue={String(rowsPerPage)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select Rows per Page" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 Rows</SelectItem>
+                  <SelectItem value="10">10 Rows</SelectItem>
+                  <SelectItem value="20">20 Rows</SelectItem>
+                  <SelectItem value="50">50 Rows</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Select Columns</Button>
+                </DialogTrigger>
+
+                <DialogContent className="sm:max-w-[450px] bg-white p-6 rounded-2xl shadow-xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg font-semibold text-gray-800">
+                      Select Columns to Display
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="grid gap-3 py-4 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    {allColumnNames.map((column) => (
+                      <div
+                        key={column}
+                        className="flex items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200"
+                      >
+                        <Input
+                          type="checkbox"
+                          id={column}
+                          checked={columnVisibility[column]}
+                          onChange={() => handleColumnToggle(column)}
+                          className="w-5 h-5 accent-blue-600 cursor-pointer"
+                        />
+                        <Label
+                          htmlFor={column}
+                          className="ml-3 text-gray-700 font-medium cursor-pointer"
+                        >
+                          {formatColumnHeader(column)}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Button variant="outline" onClick={exportToPDF}>
+                Export to PDF
+              </Button>
+              <Button variant="outline" onClick={exportToExcel}>
+                Export to Excel
+              </Button>
+            </div>
           </div>
           {isLoading ? (
             <div className="flex justify-center items-center p-8">
@@ -279,38 +408,47 @@ const AdminUsersPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {columnNames.map((column) => (
-                      <TableHead
-                        key={column}
-                        onClick={() => handleSort(column)}
-                        className="cursor-pointer whitespace-nowrap"
-                      >
-                        {formatColumnHeader(column)}
-                        {sortColumn === column && (
-                          <>
-                            {sortDirection === "asc" ? (
-                              <ArrowUp className="inline-block ml-1 h-4 w-4" />
-                            ) : (
-                              <ArrowDown className="inline-block ml-1 h-4 w-4" />
-                            )}
-                          </>
-                        )}
-                      </TableHead>
-                    ))}
+                    {allColumnNames
+                      .filter((column) => columnVisibility[column])
+                      .map((column) => (
+                        <TableHead
+                          key={column}
+                          onClick={() => handleSort(column)}
+                          className="cursor-pointer whitespace-nowrap"
+                          style={{ minWidth: "120px", width: "auto" }}
+                        >
+                          {formatColumnHeader(column)}
+                          {sortColumn === column && (
+                            <>
+                              {sortDirection === "asc" ? (
+                                <ArrowUp className="inline-block ml-1 h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="inline-block ml-1 h-4 w-4" />
+                              )}
+                            </>
+                          )}
+                        </TableHead>
+                      ))}
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedUsers.map((user) => (
+                  {usersToShow.map((user) => (
                     <TableRow key={user.user_id}>
-                      {columnNames.map((column) => (
-                        <TableCell
-                          key={`${user.user_id}-${column}`}
-                          className="whitespace-nowrap"
-                        >
-                          {user[column]}
-                        </TableCell>
-                      ))}
+                      {allColumnNames
+                        .filter((column) => columnVisibility[column])
+                        .map((column) => (
+                          <TableCell
+                            key={`${user.user_id}-${column}`}
+                            className="whitespace-nowrap"
+                          >
+                            {typeof user[column] === "boolean"
+                              ? user[column]
+                                ? "Yes"
+                                : "No"
+                              : user[column]}
+                          </TableCell>
+                        ))}
                       <TableCell>
                         <div className="flex space-x-2">
                           <Dialog>
@@ -339,13 +477,16 @@ const AdminUsersPage = () => {
                               </div>
                             </DialogContent>
                           </Dialog>
-                          <Button
-                            size="sm"
-                            className="bg-primary-800"
-                            onClick={() => handleEdit(user.user_id)}
-                          >
-                            <EditIcon className="h-4 w-4 mr-1" /> Edit
-                          </Button>
+                          {/* REMOVE EDIT BUTTON */}
+                          {/*
+                            <Button
+                              size="sm"
+                              className="bg-primary-800"
+                              onClick={() => handleEdit(user.user_id)}
+                            >
+                              <EditIcon className="h-4 w-4 mr-1" /> Edit
+                            </Button>
+                           */}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -436,4 +577,4 @@ const AdminUsersPage = () => {
   );
 };
 
-export default AdminUsersPage;
+export default AdminApplicationPage;

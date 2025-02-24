@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import axios from 'axios';
 import { Loader2 } from "lucide-react"; // Loading Icon
 import { format } from 'date-fns'; // date handling
+import Cookies from "js-cookie";
 
 const ExamPage = () => {
 
@@ -23,11 +24,10 @@ const ExamPage = () => {
     const [timeRemaining, setTimeRemaining] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [examScheduleId, setExamScheduleId] = useState(null);
-    const [examStarted, setExamStarted] = useState(false);
 
-    const user = { id: 9 };
-
-    const timerIntervalRef = useRef(null);
+    const [examStarted, setExamStarted] = useState(false); // New state for exam start
+    const user = JSON.parse(Cookies.get("userData"));    //REMOVE: Replace with your actual user ID retrieval mechanism
+    const timerIntervalRef = useRef(null); // useRef to hold the interval ID
 
     useEffect(() => {
         const checkReadiness = async () => {

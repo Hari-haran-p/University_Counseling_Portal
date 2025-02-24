@@ -7,6 +7,8 @@ import 'jspdf-autotable';
 export async function GET(req) {    
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
+  console.log(userId);
+  
 
   if (!userId) {
     return NextResponse.json({ message: "Missing userId parameter", errorType: "missing_parameter" }, { status: 400 });

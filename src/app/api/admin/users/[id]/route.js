@@ -6,7 +6,7 @@ export async function PUT(req, { params }) {
   const { id } = params;
 
   try {
-    const { username, role, name, mobno, email, dob, gender, religion, community, mother_tongue, native_state, parent_name, parent_mobno, pincode, state, district, address1, address2, city, board_name, school_name, medium, educational_pincode, educational_state, educational_district, educational_address, educational_city, month_passout, year_passout } = await req.json();
+    const { username, role, name, mobno, email, dob, gender, religion, community, mother_tongue, native_state, parent_name, parent_mobno, pincode, state, district, address1, address2, city, board_name, school_name, medium, educational_pincode, educational_state, educational_district, educational_address, educational_city, month_passout, year_passout} = await req.json();
 
     let client;
     try {

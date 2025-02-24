@@ -5,22 +5,24 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import Cookies from "js-cookie";
 
 const HallTicketPage = () => {
   const [hallTicketData, setHallTicketData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false); // State to control preview visibility
   const [errorMessage, setErrorMessage] = useState(null); // State for specific error messages
-  const userId = 9; // Remove after
-
-  useEffect(() => {
-  }, []);
+  const user = JSON.parse(Cookies.get("userData"));    //REMOVE: Replace with your actual user ID retrieval mechanism
+  console.log("user",user);
+  
+  // useEffect(() => {
+  // }, []);
 
   const generateHallTicket = async () => {
     setIsLoading(true);
     setErrorMessage(null); // Clear any previous error messages
     try {
-      const response = await axios.get(`/api/hall-ticket?userId=${userId}`); // Add validation for token is not found
+      const response = await axios.get(`/api/hall-ticket?userId=${user.id}`); // Add validation for token is not found
 
       if (response.data && response.data.hallTicketData) {
         setHallTicketData(response.data.hallTicketData);

@@ -10,6 +10,7 @@ import { loginSchema } from "../validators/login";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Cookies from "js-cookie";
 
 export default function LoginPage() {
   
@@ -18,6 +19,7 @@ export default function LoginPage() {
     username: "",
     password: "",
   });
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -39,7 +41,8 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         toast.success("Login successful!");
-        const role = response.data.role;
+        Cookies.set("userData",JSON.stringify(response.data.userData))
+        const role = JSON.parse(Cookies.get("userData")).role;
         if (role === "admin") router.push("/admin");
         if (role === "user") router.push("/");
       } else {
