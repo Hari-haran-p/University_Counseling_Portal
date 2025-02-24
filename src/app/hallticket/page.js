@@ -13,16 +13,13 @@ const HallTicketPage = () => {
   const [showPreview, setShowPreview] = useState(false); // State to control preview visibility
   const [errorMessage, setErrorMessage] = useState(null); // State for specific error messages
   const user = JSON.parse(Cookies.get("userData"));    //REMOVE: Replace with your actual user ID retrieval mechanism
-  console.log("user",user);
-  
-  // useEffect(() => {
-  // }, []);
+  console.log("user", user);
 
   const generateHallTicket = async () => {
     setIsLoading(true);
     setErrorMessage(null); // Clear any previous error messages
     try {
-      const response = await axios.get(`/api/hall-ticket?userId=${user.id}`); // Add validation for token is not found
+      const response = await axios.get(`/api/hall-ticket?userId=${parseInt(user.id)}`); // Add validation for token is not found
 
       if (response.data && response.data.hallTicketData) {
         setHallTicketData(response.data.hallTicketData);
@@ -30,7 +27,7 @@ const HallTicketPage = () => {
       } else {
         // Handle specific error cases
         console.log(response.data);
-        
+
         switch (response.data.errorType) {
           case "missing_parameter":
             setErrorMessage("Missing user ID. Please contact support.");

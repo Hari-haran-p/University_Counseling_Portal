@@ -93,7 +93,7 @@ export default function LoginPage() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ClipLoader color="#ffffff" size={20} /> // Replace text with spinner
+              <ClipLoader color="#ffffff" size={20} />
             ) : (
               "Login"
             )}

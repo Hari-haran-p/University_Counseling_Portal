@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 import { pool } from "@/db/db";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
+import fs from 'fs'; // Import the 'fs' module
+import path from 'path';
 
-export async function GET(req) {    
+export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
-  console.log(userId);
-  
 
   if (!userId) {
     return NextResponse.json({ message: "Missing userId parameter", errorType: "missing_parameter" }, { status: 400 });
@@ -18,72 +18,126 @@ export async function GET(req) {
   try {
     client = await pool.connect();
 
-    // 1. Check if User Exists
+    // 1. Check if User Exists and Get Username
     const userQuery = "SELECT id, username FROM users WHERE id = $1";
     const userValues = [userId];
     const userResult = await client.query(userQuery, userValues);
 
     if (userResult.rows.length === 0) {
-
       return NextResponse.json({ message: "User not found", errorType: "user_not_found" }, { status: 404 });
     }
     const user = userResult.rows[0];
 
-    // 2. Fetch Personal Details
-    const personalDetailsQuery = `
-      SELECT name, email
-      FROM personal_details
-      WHERE user_id = $1
+    // 2. Fetch Personal Details and Photo Filename
+    const detailsQuery = `
+      SELECT dd.photo_path
+      FROM declaration_details dd
+      WHERE dd.user_id = $1
     `;
-    const personalDetailsValues = [userId];
-    const personalDetailsResult = await client.query(personalDetailsQuery, personalDetailsValues);
-    const personalDetails = personalDetailsResult.rows[0] || {};
+    const detailsValues = [userId];
+    const detailsResult = await client.query(detailsQuery, detailsValues);
+    const details = detailsResult.rows[0] || {};
+
+    const personalQuery = `
+    SELECT dd.name, dd.email, dd.gender, dd.dob
+    FROM personal_details dd
+    WHERE dd.user_id = $1
+  `;
+  const personalValues = [userId];
+  const personalResult = await client.query(personalQuery, personalValues);
+  const personal = personalResult.rows[0] || {};
 
     // 3. Fetch Nearest Exam Schedule
     const scheduleQuery = `
       SELECT id, exam_name, start_time, end_time
       FROM exam_schedules
       WHERE start_time > NOW()
-      ORDER BY start_time DESC
+      ORDER BY start_time ASC
       LIMIT 1
     `;
+
     const scheduleResult = await client.query(scheduleQuery);
 
-    if (scheduleResult.rows.length === 0) {        
+    if (scheduleResult.rows.length === 0) {
       return NextResponse.json({ message: "No upcoming exam schedules found", errorType: "schedule_not_found" }, { status: 404 });
     }
-
     const schedule = scheduleResult.rows[0];
 
-    // Generate Hall Ticket Content
-    const hallTicketData = {
-      userName: user.username,
-      name: personalDetails.name || "N/A",
-      email: personalDetails.email || "N/A",
-      examName: schedule.exam_name,
-      startTime: schedule.start_time,
-      endTime: schedule.end_time,
-    };
+    // --- PDF Generation ---
+    const doc = new jsPDF();
 
-    // Generate PDF using jsPDF
-    const pdf = new jsPDF();
-    pdf.setFontSize(16);
-    pdf.text("University Entrance Exam - Hall Ticket", 20, 20);
+    // --- University Header (Centered) ---
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold'); // Use a bolder font
+    doc.text("Your University Name", 105, 20, { align: "center" }); // Center align
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'normal');
+    doc.text("Entrance Exam Hall Ticket", 105, 30, { align: "center" });
+    doc.line(20, 35, 190, 35);  // Horizontal line after header
 
-    pdf.setFontSize(12);
-    let yOffset = 40;
-    pdf.text(`User ID: ${user.id}`, 20, yOffset);
-    pdf.text(`Username: ${hallTicketData.userName}`, 20, yOffset + 10);
-    pdf.text(`Name: ${hallTicketData.name}`, 20, yOffset + 20);
-    pdf.text(`Email: ${hallTicketData.email}`, 20, yOffset + 30);
+    // --- User Photo ---
+    if (details.photo_path) {
+      try {
+        const imagePath = path.join(process.cwd(), 'public', 'uploads', details.photo_path); // Correct path
+        const imgData = fs.readFileSync(imagePath, 'base64'); // Read as base64
+        doc.addImage(`data:image/jpeg;base64,${imgData}`, "JPEG", 150, 45, 40, 40); // Add image, adjust position/size
+      } catch (imageError) {
+        console.error("Error loading image:", imageError);
+        // Optionally, add a placeholder image or text if the image fails to load
+      }
+    }
 
-    pdf.text(`Exam Name: ${hallTicketData.examName}`, 20, yOffset + 50);
-    pdf.text(`Start Time: ${hallTicketData.startTime}`, 20, yOffset + 60);
-    pdf.text(`End Time: ${hallTicketData.endTime}`, 20, yOffset + 70);
 
-    // Convert PDF to base64 string
-    const pdfBase64 = pdf.output('datauristring');
+    // --- User Details ---
+    doc.setFontSize(12);
+    let yOffset = 50;
 
+    // doc.text(`User ID: ${user.id}`, 20, yOffset);
+    // yOffset += 10;
+    // doc.text(`Username: ${user.username}`, 20, yOffset);
+    // yOffset += 10;
+    doc.text(`Name: ${personal.name || "N/A"}`, 20, yOffset);
+    yOffset += 10;
+    doc.text(`Email: ${personal.email || "N/A"}`, 20, yOffset);
+    yOffset += 15;
+
+    // --- Exam Details ---
+    doc.setFont('helvetica', 'bold');
+    doc.text("Exam Details", 20, yOffset);
+    doc.setFont('helvetica', 'normal');
+    yOffset += 10;
+    doc.text(`Exam Name: ${schedule.exam_name}`, 20, yOffset);
+    yOffset += 10;
+    //Use toLocalString() to format date
+    doc.text(`Start Time: ${schedule?.start_time?.toISOString().split("T")[0]}, ${schedule?.start_time?.toISOString().split("T")[1].slice(0, 8)}`, 20, yOffset);
+    yOffset += 10;
+    doc.text(`End Time: ${schedule?.end_time?.toISOString().split("T")[0]}, ${schedule?.end_time?.toISOString().split("T")[1].slice(0, 8)}`, 20, yOffset);
+    yOffset += 15;
+
+    // --- Instructions (Example) ---
+    doc.setFont('helvetica', 'bold');
+    doc.text("Instructions:", 20, yOffset);
+    doc.setFont('helvetica', 'normal');
+    yOffset += 10;
+
+    const instructions = [
+      "1. Please arrive at the examination hall at least 30 minutes before the start time.",
+      "2. Bring a valid photo ID (e.g., driver's license, passport) for verification.",
+      "3. No electronic devices (phones, calculators, smartwatches) are allowed.",
+      "4. Follow the invigilator's instructions carefully.",
+    ];
+    //Use the loop for instructions
+    instructions.forEach((instruction) => {
+      doc.text(instruction, 20, yOffset, { maxWidth: 170 }); // Wrap long text
+      yOffset += 10;
+    });
+
+    // --- Footer (Optional) ---
+    doc.setFontSize(10);
+    doc.text("Generated on: " + new Date().toLocaleString(), 20, 280); 
+
+    // Convert PDF to data URL
+    const pdfBase64 = doc.output('datauristring');
     return NextResponse.json({ hallTicketData: pdfBase64 }, { status: 200 });
 
   } catch (error) {
