@@ -10,6 +10,7 @@ import { format } from 'date-fns'; // date handling
 import Cookies from "js-cookie";
 
 const ExamPage = () => {
+
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [shuffledQuestions, setShuffledQuestions] = useState([]);
     const [userAnswers, setUserAnswers] = useState({});
@@ -18,11 +19,12 @@ const ExamPage = () => {
     const router = useRouter();
     const [hasTakenExam, setHasTakenExam] = useState(false);
     const [isExamScheduled, setIsExamScheduled] = useState(false);
-    const [hasDeclaration, setHasDeclaration] = useState(false);  // New state for declaration
-    const [examEndTime, setExamEndTime] = useState(null); // Exam End Time
-    const [timeRemaining, setTimeRemaining] = useState(0); // Exam Time remaining
-    const [isLoading, setIsLoading] = useState(true); // Loading indicator
+    const [hasDeclaration, setHasDeclaration] = useState(false);
+    const [examEndTime, setExamEndTime] = useState(null);
+    const [timeRemaining, setTimeRemaining] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
     const [examScheduleId, setExamScheduleId] = useState(null);
+
     const [examStarted, setExamStarted] = useState(false); // New state for exam start
     const user = JSON.parse(Cookies.get("userData"));    //REMOVE: Replace with your actual user ID retrieval mechanism
     const timerIntervalRef = useRef(null); // useRef to hold the interval ID
@@ -32,7 +34,7 @@ const ExamPage = () => {
             if (!user?.id) {
                 return;
             }
-            setIsLoading(true); // Set loading to true at the start
+            setIsLoading(true);
 
             try {
                 // Check declaration, exam status, and schedule in parallel

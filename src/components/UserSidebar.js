@@ -11,6 +11,7 @@ export function UserSidebar({ toggleSidebar }) {  // Receive toggleSidebar as a 
     { href: "/hallticket", label: "Hall Ticket", icon: Ticket },
     { href: "/exam", label: "Take Exam", icon: Book },
     { href: "/results", label: "View Exam Results", icon: HelpCircle },
+    { href: "/counseling", label: "Counseling", icon: FileText }, // ADDED counseling
     { href: "/profile", label: "Profile", icon: User },
   ]
 
