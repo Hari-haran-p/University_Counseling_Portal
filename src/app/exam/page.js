@@ -49,16 +49,16 @@ const ExamPage = () => {
 
                 if (!declarationResponse.data.hasDeclaration) {
                     alert("You must make the declaration before taking the exam.");
-                    return; // Prevent further execution
+                    return;
                 }
                 if (examStatusResponse.data.hasTakenExam) {
-                    return; // Prevent further execution
+                    return;
                 }
                 // Exam Schedule Check                
                 if (examScheduleResponse.data.length === 0) {
                     setIsExamScheduled(false);
                     alert("No exam schedules found. Please contact the administrator.");
-                    return; // Prevent further execution
+                    return;
                 }
                 const now = new Date();
                 let closestSchedule = null;
@@ -81,7 +81,7 @@ const ExamPage = () => {
                 if (!closestSchedule) {
                     setIsExamScheduled(false);
                     alert("No upcoming exam schedules found.");
-                    return; // Prevent further execution
+                    return;
                 }
 
                 let [datePart, timePart] = closestSchedule.start_time.split("T");
@@ -105,26 +105,25 @@ const ExamPage = () => {
                 if (now < start) {
                     setIsExamScheduled(false);
                     alert(`The exam is scheduled to start at ${format(start, 'MMM dd, yyyy hh:mm a')}.`);
-                    return; // Prevent further execution
+                    return;
                 }
                 if (now > end) {
                     setIsExamScheduled(false);
                     alert(`The exam was scheduled to end at ${format(end, 'MMM dd, yyyy hh:mm a')}. It is no longer available.`);
-                    return; // Prevent further execution
+                    return;
                 }
                 setIsExamScheduled(true);
                 setExamEndTime(end);
-                //fetchQuestions();
+
             } catch (error) {
                 console.error("Error checking readiness:", error);
                 alert("Failed to check exam readiness. Please try again later.");
             } finally {
-                setIsLoading(false);  // Set loading to false
+                setIsLoading(false);
             }
         };
 
         checkReadiness();
-
     }, [user?.id]);
 
     const fetchQuestions = async () => {
@@ -138,7 +137,6 @@ const ExamPage = () => {
         }
     };
 
-    //Timer useEffect
     useEffect(() => {
         if (examEndTime && examStarted) {
             timerIntervalRef.current = setInterval(() => {
@@ -172,10 +170,10 @@ const ExamPage = () => {
             finishExam();
         }
     };
-  const startExam = () => {
-    fetchQuestions(); // Load questions when exam is started
-    setExamStarted(true);
-  };
+    const startExam = () => {
+        fetchQuestions(); // Load questions when exam is started
+        setExamStarted(true);
+    };
     const formatTime = (milliseconds) => {
         const totalSeconds = Math.floor(milliseconds / 1000);
         const minutes = Math.floor((totalSeconds % 3600) / 60);

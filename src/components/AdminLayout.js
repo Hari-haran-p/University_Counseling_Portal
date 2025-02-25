@@ -18,10 +18,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  // State for sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  
   const router = useRouter();
-  const sidebarRef = useRef(null);  // Ref for the sidebar
-  const sidebarWidth = "64";  // Width of the sidebar in rem
+  const sidebarRef = useRef(null); 
+  const sidebarWidth = "64";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

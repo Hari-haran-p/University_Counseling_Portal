@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     setIsAdminRoute(pathname?.startsWith("/admin") || false);
-    setIsLoginRoute(pathname?.startsWith("/login") || false);
+    setIsLoginRoute(pathname?.startsWith("/login") || pathname?.startsWith("/registration") || false);
   }, [pathname]);
 
 
