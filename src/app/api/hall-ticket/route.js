@@ -69,7 +69,7 @@ export async function GET(req) {
     // --- University Header (Centered) ---
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold'); // Use a bolder font
-    doc.text("Your University Name", 105, 20, { align: "center" }); // Center align
+    doc.text("Panimalar University", 105, 20, { align: "center" }); // Center align
     doc.setFontSize(16);
     doc.setFont('helvetica', 'normal');
     doc.text("Entrance Exam Hall Ticket", 105, 30, { align: "center" });
@@ -120,17 +120,19 @@ export async function GET(req) {
     doc.setFont('helvetica', 'normal');
     yOffset += 10;
 
-    // const instructions = [
-    //   "1. Please arrive at the examination hall at least 30 minutes before the start time.",
-    //   "1. Bring a valid photo ID (e.g., driver's license, passport) for verification.",
-    //   "2. No electronic devices (phones, calculators, smartwatches) are allowed.",
-    //   "3. Follow the invigilator's instructions carefully.",
-    // ];
-    // //Use the loop for instructions
-    // instructions.forEach((instruction) => {
-    //   doc.text(instruction, 20, yOffset, { maxWidth: 170 }); // Wrap long text
-    //   yOffset += 10;
-    // });
+    const instructions = [
+      "1. Ensure you have a stable internet connection before starting the exam.",
+      "2. Log in to the examination portal at least 15 minutes before the exam begins.",
+      "3. Keep a valid photo ID ready for online verification, if required.",
+      "4. Do not open any other tabs or applications during the exam, as this may lead to disqualification.",
+      "5. Follow the on-screen instructions carefully and submit your answers before the time limit expires."
+    ];
+    
+    //Use the loop for instructions
+    instructions.forEach((instruction) => {
+      doc.text(instruction, 20, yOffset, { maxWidth: 170 }); // Wrap long text
+      yOffset += 10;
+    });
 
     // --- Footer (Optional) ---
     doc.setFontSize(10);
