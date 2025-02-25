@@ -127,7 +127,7 @@ export default function RegistrationPage() {
 
                     <Button
                         type="submit"
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center"
+                        className="w-full mb-9 bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center"
                         disabled={isLoading}
                     >
                        {isLoading ? (
@@ -136,6 +136,7 @@ export default function RegistrationPage() {
                             "Register"
                         )}
                     </Button>
+                    <a className="text-sm w-full mt-3 underline text-blue-700" href="/login">Already user ? Click here to signin !!</a>
                 </form>
             </div>
         </div>

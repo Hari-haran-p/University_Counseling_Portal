@@ -26,8 +26,8 @@ export default function AdminDashboard() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div className="text-2xl font-bold">NA</div>
+            <p className="text-xs text-muted-foreground">+% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -47,8 +47,8 @@ export default function AdminDashboard() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">237</div>
-            <p className="text-xs text-muted-foreground">+5.4% from last week</p>
+            <div className="text-2xl font-bold">NA</div>
+            <p className="text-xs text-muted-foreground">+% from last week</p>
           </CardContent>
         </Card>
         <Card>
@@ -69,11 +69,11 @@ export default function AdminDashboard() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">573</div>
-            <p className="text-xs text-muted-foreground">+19% from last year</p>
+            <div className="text-2xl font-bold">NA</div>
+            <p className="text-xs text-muted-foreground">-% from last year</p>
           </CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
             <svg
@@ -90,12 +90,12 @@ export default function AdminDashboard() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
+            <div className="text-2xl font-bold">NA</div>
             <p className="text-xs text-muted-foreground">+2 new courses this semester</p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Overview</CardTitle>
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
             <RecentApplications />
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   )
 }

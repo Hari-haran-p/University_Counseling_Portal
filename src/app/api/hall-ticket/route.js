@@ -120,17 +120,17 @@ export async function GET(req) {
     doc.setFont('helvetica', 'normal');
     yOffset += 10;
 
-    const instructions = [
-      "1. Please arrive at the examination hall at least 30 minutes before the start time.",
-      "2. Bring a valid photo ID (e.g., driver's license, passport) for verification.",
-      "3. No electronic devices (phones, calculators, smartwatches) are allowed.",
-      "4. Follow the invigilator's instructions carefully.",
-    ];
-    //Use the loop for instructions
-    instructions.forEach((instruction) => {
-      doc.text(instruction, 20, yOffset, { maxWidth: 170 }); // Wrap long text
-      yOffset += 10;
-    });
+    // const instructions = [
+    //   "1. Please arrive at the examination hall at least 30 minutes before the start time.",
+    //   "1. Bring a valid photo ID (e.g., driver's license, passport) for verification.",
+    //   "2. No electronic devices (phones, calculators, smartwatches) are allowed.",
+    //   "3. Follow the invigilator's instructions carefully.",
+    // ];
+    // //Use the loop for instructions
+    // instructions.forEach((instruction) => {
+    //   doc.text(instruction, 20, yOffset, { maxWidth: 170 }); // Wrap long text
+    //   yOffset += 10;
+    // });
 
     // --- Footer (Optional) ---
     doc.setFontSize(10);

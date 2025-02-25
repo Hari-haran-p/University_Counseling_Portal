@@ -1,4 +1,3 @@
-// app/exam/page.js
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -7,10 +6,10 @@ import { useRouter } from "next/navigation";
 import axios from 'axios';
 import { Loader2 } from "lucide-react"; // Loading Icon
 import { format } from 'date-fns'; // date handling
-import Cookies from "js-cookie";
+import Cookies from 'js-cookie';
+import { toast } from "react-fox-toast";
 
 const ExamPage = () => {
-
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [shuffledQuestions, setShuffledQuestions] = useState([]);
     const [userAnswers, setUserAnswers] = useState({});
@@ -19,20 +18,22 @@ const ExamPage = () => {
     const router = useRouter();
     const [hasTakenExam, setHasTakenExam] = useState(false);
     const [isExamScheduled, setIsExamScheduled] = useState(false);
-    const [hasDeclaration, setHasDeclaration] = useState(false);
-    const [examEndTime, setExamEndTime] = useState(null);
-    const [timeRemaining, setTimeRemaining] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [hasDeclaration, setHasDeclaration] = useState(false);  // New state for declaration
+    const [examEndTime, setExamEndTime] = useState(null); // Exam End Time
+    const [timeRemaining, setTimeRemaining] = useState(0); // Exam Time remaining
+    const [isLoading, setIsLoading] = useState(true); // Loading indicator
     const [examScheduleId, setExamScheduleId] = useState(null);
-
     const [examStarted, setExamStarted] = useState(false); // New state for exam start
-    const user = JSON.parse(Cookies.get("userData"));    //REMOVE: Replace with your actual user ID retrieval mechanism
-    const timerIntervalRef = useRef(null); // useRef to hold the interval ID
+    const [upcomingExamMessage, setUpcomingExamMessage] = useState(""); // State for upcoming exam message
+
+    const user = JSON.parse(Cookies.get("userData") || '{}'); // Get user data
+    const timerIntervalRef = useRef(null);
 
     useEffect(() => {
         const checkReadiness = async () => {
             if (!user?.id) {
-                return;
+                //  router.push('/login');  // Redirect if not logged in (optional)
+                return; // Don't proceed if not logged in.
             }
             setIsLoading(true);
 
@@ -48,118 +49,150 @@ const ExamPage = () => {
                 setHasTakenExam(examStatusResponse.data.hasTakenExam);
 
                 if (!declarationResponse.data.hasDeclaration) {
-                    alert("You must make the declaration before taking the exam.");
+                    toast.error("You must make the declaration before taking the exam.", {
+                        className: 'bg-primary-600 text-white rounded-3xl',
+                    });
                     return;
                 }
                 if (examStatusResponse.data.hasTakenExam) {
                     return;
                 }
-                // Exam Schedule Check                
+
+                // Exam Schedule Check
                 if (examScheduleResponse.data.length === 0) {
                     setIsExamScheduled(false);
-                    alert("No exam schedules found. Please contact the administrator.");
+                    setUpcomingExamMessage("No exam schedules found. Please contact the administrator.");
                     return;
                 }
+
                 const now = new Date();
                 let closestSchedule = null;
-                let timeDiff = Infinity;
+                let smallestTimeUntilStart = Infinity; // Initialize with a large value
 
-                examScheduleResponse.data.forEach(schedule => {
-                    const [datePart, timePart] = schedule.start_time.split("T");
-                    const [year, month, day] = datePart.split("-").map(Number);
-                    const [hour, minute, second] = timePart.replace("Z", "").split(":").map(num => Math.floor(Number(num)));
+                for (const schedule of examScheduleResponse.data) {
+                    let [datePart, timePart] = schedule.start_time.split("T");
+                    let [year, month, day] = datePart.split("-").map(Number);
+                    let [hour, minute, second] = timePart.replace("Z", "").split(":").map(num => Math.floor(Number(num)));
                     const start = new Date(year, month - 1, day, hour, minute, second);
+                    
+                    [datePart, timePart] = schedule.end_time.split("T");
+                    [year, month, day] = datePart.split("-").map(Number);
+                    [hour, minute, second] = timePart.replace("Z", "").split(":").map(num => Math.floor(Number(num)));
+                    
+                    const end = new Date(year, month - 1, day, hour, minute, second);
+    
+                    // Check if the current time is *within* the exam window
+                    if (now >= start && now <= end) {
+                        closestSchedule = schedule;  // This is the active exam
+                        break; // Exit the loop - we're in an active exam!
+                    }
 
-                    const end = schedule.end_time
-                    const diff = now.getTime() - start.getTime();
-                    if (diff > 0 && diff < timeDiff) {
-                        timeDiff = diff;
+
+                    const timeUntilStart = start.getTime() - now.getTime();  // milliseconds until start
+
+                    // Find the *closest* future exam, even if others are past.
+                    if (timeUntilStart > 0 && timeUntilStart < smallestTimeUntilStart) {
+                        smallestTimeUntilStart = timeUntilStart;
                         closestSchedule = schedule;
                     }
-                });
 
+                }
                 if (!closestSchedule) {
+                    // No future schedules.
                     setIsExamScheduled(false);
-                    alert("No upcoming exam schedules found.");
+                    setUpcomingExamMessage("No upcoming exam schedules found.");
                     return;
                 }
+
 
                 let [datePart, timePart] = closestSchedule.start_time.split("T");
                 let [year, month, day] = datePart.split("-").map(Number);
                 let [hour, minute, second] = timePart.replace("Z", "").split(":").map(num => Math.floor(Number(num)));
-
+                
                 const start = new Date(year, month - 1, day, hour, minute, second);
-
+                
+                
+                
                 [datePart, timePart] = closestSchedule.end_time.split("T");
                 [year, month, day] = datePart.split("-").map(Number);
                 [hour, minute, second] = timePart.replace("Z", "").split(":").map(num => Math.floor(Number(num)));
-
+                
                 const end = new Date(year, month - 1, day, hour, minute, second);
-                setExamScheduleId(closestSchedule.id)
-                console.log(closestSchedule.id);
-
-                console.log("now" + now)
-                console.log("start " + start)
-                console.log("end" + end)
-
+                
                 if (now < start) {
+                    // It's a future exam
                     setIsExamScheduled(false);
-                    alert(`The exam is scheduled to start at ${format(start, 'MMM dd, yyyy hh:mm a')}.`);
-                    return;
-                }
-                if (now > end) {
+                    setUpcomingExamMessage(
+                        `The exam is scheduled to start on ${format(
+                            start,
+                            "MMM dd, yyyy hh:mm a"
+                        )}.`
+                    );
+                } else if (now > end) {
+                    //This case should not happen as data where taken from closest
                     setIsExamScheduled(false);
-                    alert(`The exam was scheduled to end at ${format(end, 'MMM dd, yyyy hh:mm a')}. It is no longer available.`);
-                    return;
+                    setUpcomingExamMessage(
+                        `The exam was scheduled to end at ${format(
+                            end,
+                            "MMM dd, yyyy hh:mm a"
+                        )}. It is no longer available.`
+                    );
+
                 }
-                setIsExamScheduled(true);
-                setExamEndTime(end);
+
+                else {
+                    // It's within the exam window!
+                    setIsExamScheduled(true);
+                    setExamEndTime(end);  // Set the end time.
+                    setExamScheduleId(closestSchedule.id); // Set the ID
+                    setUpcomingExamMessage(""); // Clear any previous message
+                }
 
             } catch (error) {
                 console.error("Error checking readiness:", error);
-                alert("Failed to check exam readiness. Please try again later.");
+                toast.error("Failed to check exam readiness. Please try again later.", {
+                    className: 'bg-primary-600 text-white rounded-3xl',
+                });
             } finally {
                 setIsLoading(false);
             }
         };
 
         checkReadiness();
-    }, [user?.id]);
+    }, [user?.id]); // Depends on user.id
 
     const fetchQuestions = async () => {
         try {
             const response = await axios.get("/api/questions");
             setShuffledQuestions(response.data.sort(() => Math.random() - 0.5));
-            console.log(response.data.sort(() => Math.random() - 0.5));
         } catch (error) {
             console.error("Error fetching questions:", error);
-            alert("Failed to load questions.");
+            toast.error("Failed to load questions.", {
+                className: 'bg-primary-600 text-white rounded-3xl',
+            });
         }
     };
-
     useEffect(() => {
-        if (examEndTime && examStarted) {
+        if (examEndTime && examStarted) { // Only start the timer *if* the exam has started.
             timerIntervalRef.current = setInterval(() => {
                 const now = new Date();
-                const timeLeft = examEndTime.getTime() - now.getTime();
+                const timeLeft = new Date(examEndTime).getTime() - now.getTime();
 
                 if (timeLeft <= 0) {
                     clearInterval(timerIntervalRef.current);
                     setTimeRemaining(0);
-                    autoSubmitExam(true);
+                    autoSubmitExam(true); // Auto-submit
                 } else {
                     setTimeRemaining(timeLeft);
                 }
             }, 1000);
 
-            return () => clearInterval(timerIntervalRef.current); // Cleanup on unmount
+            return () => clearInterval(timerIntervalRef.current);  // Cleanup on unmount/stop
         }
-    }, [examEndTime, examStarted]);
+    }, [examEndTime, examStarted]); // Depend on examStarted
+
 
     const handleAnswer = (selectedAnswer) => {
-        console.log(userAnswers);
-        console.log(shuffledQuestions[currentQuestionIndex]);
-
         setUserAnswers({ ...userAnswers, [shuffledQuestions[currentQuestionIndex].id]: selectedAnswer });
     };
 
@@ -172,18 +205,21 @@ const ExamPage = () => {
     };
     const startExam = () => {
         fetchQuestions(); // Load questions when exam is started
-        setExamStarted(true);
+        setExamStarted(true); // Set examStarted to true
     };
+
     const formatTime = (milliseconds) => {
         const totalSeconds = Math.floor(milliseconds / 1000);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
         return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     };
+
     const finishExam = async () => {
-        if (!user?.id || !examScheduleId) {
+        if (!user?.id || !examScheduleId) {  // Check for examScheduleId as well
             return;
         }
+
         let correctAnswersCount = 0;
         shuffledQuestions.forEach((question) => {
             if (userAnswers[question.id] === question.correctAnswer) {
@@ -195,23 +231,33 @@ const ExamPage = () => {
             await axios.post("/api/exam-result", {
                 userId: user.id,
                 score: finalScore,
-                examId: examScheduleId
+                examId: examScheduleId, // Send the exam schedule ID!
             });
             setExamFinished(true);
+            toast.success("Exam submitted successfully!", {
+                className: 'bg-primary-800 text-white rounded-3xl',
+            });
         } catch (error) {
             console.error("Error storing exam result:", error);
-            alert("Failed to store exam result.");
+            toast.error("Failed to store exam result.", {
+                className: 'bg-primary-600 text-white rounded-3xl',
+            });
         }
     };
-
     const autoSubmitExam = async (isTimeOut = false) => {
         if (!user?.id || !examScheduleId) {
             return;
         }
 
         let correctAnswersCount = 0;
-        shuffledQuestions.forEach((question) => {
-            if (userAnswers[question.id] === question.correctAnswer) {
+
+        // Calculate the number of correct answers based on userAnswers
+        Object.keys(userAnswers).forEach((questionId) => {
+            // Check if the current question is in the shuffledQuestions array
+            const question = shuffledQuestions.find((q) => q.id === questionId);
+
+            // If the question exists and the user's answer is correct, increment the count
+            if (question && userAnswers[questionId] === question.correctAnswer) {
                 correctAnswersCount++;
             }
         });
@@ -222,19 +268,23 @@ const ExamPage = () => {
             await axios.post("/api/exam-result", {
                 userId: user.id,
                 score: finalScore,
-                examId: examScheduleId,
+                examId: examScheduleId, // Send the exam schedule ID!
             });
 
             if (isTimeOut) {
-                alert("Exam auto-submitted due to time limit.");
+                toast.info("Exam auto-submitted due to time limit.", { // Different message
+                    className: 'bg-primary-800 text-white rounded-3xl',
+                });
             }
 
             setExamFinished(true);
         } catch (error) {
             console.error("Error auto-submitting exam:", error);
-            alert("Failed to auto-submit exam.");
+            toast.error("Failed to auto-submit exam.", {
+                className: 'bg-primary-600 text-white rounded-3xl',
+            });
         } finally {
-            setExamFinished(true); // Ensure exam is marked as finished
+            setExamFinished(true);  // Ensure exam is marked as finished
         }
     };
 
@@ -246,6 +296,7 @@ const ExamPage = () => {
             </div>
         );
     }
+
     if (!hasDeclaration) {
         return (
             <div className="container mx-auto py-10">
@@ -257,6 +308,7 @@ const ExamPage = () => {
             </div>
         );
     }
+
     if (hasTakenExam) {
         return (
             <div className="container mx-auto py-10">
@@ -271,16 +323,14 @@ const ExamPage = () => {
     if (!isExamScheduled) {
         return (
             <div className="container mx-auto py-10">
-                <h2 className="text-2xl font-bold mb-4">Exam Not Scheduled</h2>
-                <p className="mb-4">This exam is not currently scheduled. Please check back later.</p>
-                <Button onClick={() => router.push('/')} className="bg-green-800 ml-3">
+                <h2 className="text-2xl font-bold mb-4">Exam Schedule</h2>
+                <p className="mb-4">{upcomingExamMessage}</p>
+                <Button onClick={() => router.push("/")} className="bg-green-800 ml-3">
                     Back To Dashboard
                 </Button>
             </div>
         );
     }
-
-    // Show "Start Exam" button before the exam is started
     if (!examStarted) {
         return (
             <div className="container mx-auto py-10 text-center">
@@ -292,6 +342,7 @@ const ExamPage = () => {
             </div>
         );
     }
+
 
     if (shuffledQuestions.length === 0) {
         return <div className="container mx-auto py-10">Loading questions...</div>;

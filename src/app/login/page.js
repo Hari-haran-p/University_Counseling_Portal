@@ -106,6 +106,7 @@ export default function LoginPage() {
               "Login"
             )}
           </Button>
+          <a className="text-sm w-full mt-3 underline text-blue-700" href="/registration">New user ? Click here to signup !!</a>
         </form>
       </div>
     </div>
