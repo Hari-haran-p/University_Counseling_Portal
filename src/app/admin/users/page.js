@@ -171,11 +171,7 @@ const AdminUsersPage = () => {
     "board_name",
     "school_name",
     "medium",
-    "educational_pincode",
-    "educational_state",
-    "educational_district",
     "educational_address",
-    "educational_city",
     "month_passout",
     "year_passout",
   ];

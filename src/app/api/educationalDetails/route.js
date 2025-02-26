@@ -85,7 +85,10 @@ export async function POST(req) {
 
       await client.query(updateQuery, updateValues);
       console.log("Educational details successfully updated in the database.");
-      return NextResponse.json({ message: "Data updated successfully" , status : 200});
+      return NextResponse.json({
+        message: "Data updated successfully",
+        status: 200,
+      });
     } else {
       // Insert a new record
       const insertQuery = `
@@ -111,7 +114,7 @@ export async function POST(req) {
       console.log(
         "Educational details successfully inserted into the database."
       );
-      return NextResponse.json({ message: "Data saved successfully" });
+      return NextResponse.json({ message: "Data saved successfully"}, { status: 200 });
     }
   } catch (error) {
     console.error("Error inserting/updating data:", error);
