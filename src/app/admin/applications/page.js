@@ -53,36 +53,37 @@ const AdminApplicationPage = () => {
   const allColumnNames = [
     "user_id",
     "username",
-    // "role",
     "name",
     "mobno",
     "email",
     "dob",
     "gender",
-    // "religion",
+    "religion",
     "community",
-    // "mother_tongue",
-    // "native_state",
-    // "parent_name",
-    // "parent_mobno",
-    // "personal_pincode",
-    // "personal_state",
-    // "personal_district",
-    // "address1",
-    // "address2",
-    // "personal_city",
-    // "board_name",
-    // "school_name",
-    // "medium",
+    "mother_tongue",
+    "native_state",
+    "parent_name",
+    "parent_mobno",
+    "personal_pincode",
+    "personal_state",
+    "personal_district",
+    "address1",
+    "address2",
+    "personal_city",
+    "board_name",
+    "school_name",
+    "medium",
     // "educational_pincode",
     // "educational_state",
     // "educational_district",
-    // "educational_address",
+    "educational_address",
     // "educational_city",
-    // "month_passout",
-    // "year_passout",
-    // "declaration",
+    "month_passout",
+    "year_passout",
+    "declaration",
   ];
+
+  const tableColumns = ["user_id", "username", "name", "mobno", "email", "dob", "gender", "community"]
   // Default rows per page
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initialVisibility = {};
@@ -320,6 +321,7 @@ const AdminApplicationPage = () => {
     XLSX.writeFile(wb, "user_data.xlsx");
   };
 
+
   return (
     <div className="container mx-auto py-10 px-4">
       <Card className="mb-8">
@@ -366,26 +368,30 @@ const AdminApplicationPage = () => {
                   </DialogHeader>
 
                   <div className="grid gap-3 py-4 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    {allColumnNames.map((column) => (
-                      <div
-                        key={column}
-                        className="flex items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200"
-                      >
-                        <Input
-                          type="checkbox"
-                          id={column}
-                          checked={columnVisibility[column]}
-                          onChange={() => handleColumnToggle(column)}
-                          className="w-5 h-5 accent-blue-600 cursor-pointer"
-                        />
-                        <Label
-                          htmlFor={column}
-                          className="ml-3 text-gray-700 font-medium cursor-pointer"
-                        >
-                          {formatColumnHeader(column)}
-                        </Label>
-                      </div>
-                    ))}
+                    {allColumnNames.map((column) => {
+                      return (
+                        <>
+                          <div
+                            key={column}
+                            className="flex items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition duration-200"
+                          >
+                            <Input
+                              type="checkbox"
+                              id={column}
+                              checked={columnVisibility[column]}
+                              onChange={() => handleColumnToggle(column)}
+                              className="w-5 h-5 accent-blue-600 cursor-pointer"
+                            />
+                            <Label
+                              htmlFor={column}
+                              className="ml-3 text-gray-700 font-medium cursor-pointer"
+                            >
+                              {formatColumnHeader(column)}
+                            </Label>
+                          </div>
+                        </>
+                      )
+                    })}
                   </div>
                 </DialogContent>
               </Dialog>
@@ -396,6 +402,8 @@ const AdminApplicationPage = () => {
               <Button variant="outline" onClick={exportToExcel}>
                 Export to Excel
               </Button>
+
+
             </div>
           </div>
           {isLoading ? (
@@ -410,25 +418,30 @@ const AdminApplicationPage = () => {
                   <TableRow>
                     {allColumnNames
                       .filter((column) => columnVisibility[column])
-                      .map((column) => (
-                        <TableHead
-                          key={column}
-                          onClick={() => handleSort(column)}
-                          className="cursor-pointer whitespace-nowrap"
-                          style={{ minWidth: "120px", width: "auto" }}
-                        >
-                          {formatColumnHeader(column)}
-                          {sortColumn === column && (
-                            <>
-                              {sortDirection === "asc" ? (
-                                <ArrowUp className="inline-block ml-1 h-4 w-4" />
-                              ) : (
-                                <ArrowDown className="inline-block ml-1 h-4 w-4" />
+                      .map((column) => {
+                        if (tableColumns.includes(column)) {
+
+                          return (
+                            <TableHead
+                              key={column}
+                              onClick={() => handleSort(column)}
+                              className="cursor-pointer whitespace-nowrap"
+                              style={{ minWidth: "120px", width: "auto" }}
+                            >
+                              {formatColumnHeader(column)}
+                              {sortColumn === column && (
+                                <>
+                                  {sortDirection === "asc" ? (
+                                    <ArrowUp className="inline-block ml-1 h-4 w-4" />
+                                  ) : (
+                                    <ArrowDown className="inline-block ml-1 h-4 w-4" />
+                                  )}
+                                </>
                               )}
-                            </>
-                          )}
-                        </TableHead>
-                      ))}
+                            </TableHead>
+                          )
+                        }
+                      })}
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -436,19 +449,22 @@ const AdminApplicationPage = () => {
                   {usersToShow.map((user) => (
                     <TableRow key={user.user_id}>
                       {allColumnNames
+
                         .filter((column) => columnVisibility[column])
-                        .map((column) => (
-                          <TableCell
-                            key={`${user.user_id}-${column}`}
-                            className="whitespace-nowrap"
-                          >
-                            {typeof user[column] === "boolean"
-                              ? user[column]
-                                ? "Yes"
-                                : "No"
-                              : user[column]}
-                          </TableCell>
-                        ))}
+                        .map((column) => {
+                          if (tableColumns.includes(column)) {
+
+                            return (
+                              <TableCell
+                                key={`${user.user_id}-${column}`}
+                                className="whitespace-nowrap"
+                              >
+
+                                {user[column]}
+                              </TableCell>
+                            )
+                          }
+                        })}
                       <TableCell>
                         <div className="flex space-x-2">
                           <Dialog>
@@ -466,14 +482,19 @@ const AdminApplicationPage = () => {
                                 <DialogTitle>User Details</DialogTitle>
                               </DialogHeader>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                {allColumnNames.map((column) => (
-                                  <div key={column} className="space-y-1">
-                                    <Label className="font-medium">
-                                      {formatColumnHeader(column)}
-                                    </Label>
-                                    <p>{user[column]}</p>
-                                  </div>
-                                ))}
+                                {allColumnNames.map((column) => {
+                                  console.log(user);
+                                  
+                                  return (
+                                    <div key={column} className="space-y-1">
+                                      <Label className="font-medium">
+                                        {formatColumnHeader(column)}
+                                      </Label>
+                                      <p>{user[column]}</p>
+                                    </div>
+                                  )
+
+                                })}
                               </div>
                             </DialogContent>
                           </Dialog>
