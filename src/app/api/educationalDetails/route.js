@@ -10,7 +10,7 @@ export async function GET(req) {
     const query = `
       SELECT board_name, school_name, medium, pincode, state, district, address, city, month_passout, year_passout
       FROM educational_info
-      WHERE id = $1;
+      WHERE user_id = $1;
     `;
 
     const values = [userId];
@@ -56,7 +56,7 @@ export async function POST(req) {
 
     // Check if a record already exists for the user
     const checkQuery = `
-        SELECT id FROM educational_info WHERE id = $1
+        SELECT id FROM educational_info WHERE user_id = $1
       `;
     const checkValues = [userId];
     const checkResult = await client.query(checkQuery, checkValues);
@@ -67,7 +67,7 @@ export async function POST(req) {
           UPDATE educational_info
           SET board_name = $2, school_name = $3, medium = $4, pincode = $5, state = $6,
               district = $7, address = $8, city = $9, month_passout = $10, year_passout = $11
-          WHERE id = $1
+          WHERE user_id = $1
         `;
       const updateValues = [
         userId,
@@ -89,7 +89,7 @@ export async function POST(req) {
     } else {
       // Insert a new record
       const insertQuery = `
-          INSERT INTO educational_info (id, board_name, school_name, medium, pincode, state, district, address, city, month_passout, year_passout)
+          INSERT INTO educational_info (user_id, board_name, school_name, medium, pincode, state, district, address, city, month_passout, year_passout)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         `;
 
