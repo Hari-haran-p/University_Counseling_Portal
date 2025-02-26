@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-import { parse } from "cookie";
+import { parse, serialize } from "cookie";
 
 const PUBLIC_ROUTES = [
   "/login",
@@ -30,7 +30,7 @@ export async function middleware(req) {
 
   if (!token) {
     console.log("[Middleware] No token found, redirecting to /login");
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/registration", req.url));
   }
 
   try {
@@ -58,11 +58,21 @@ export async function middleware(req) {
 
     console.log("[Middleware] User data added to headers. Proceeding to next.");
 
-    return NextResponse.next({
+    const response = NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     });
+
+    response.headers.set(
+      "Set-Cookie",
+      serialize("userId", payload.userId, {
+        path: "/",
+      })
+    );
+
+    return response;
+
   } catch (error) {
     console.error("[Middleware] Token verification failed:", error.message);
     console.log("[Middleware] Invalid token, redirecting to /login");

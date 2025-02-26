@@ -6,12 +6,13 @@ export function UserSidebar({ toggleSidebar }) {  // Receive toggleSidebar as a 
   const pathname = usePathname()
 
   const links = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/apply", label: "Apply", icon: FileText },
     { href: "/hallticket", label: "Hall Ticket", icon: Ticket },
     { href: "/exam", label: "Take Exam", icon: Book },
     { href: "/results", label: "View Exam Results", icon: HelpCircle },
-    { href: "/profile", label: "Profile", icon: User },
+    { href: "/counseling", label: "Counseling", icon: FileText }, // ADDED counseling
+    // { href: "/profile", label: "Profile", icon: User },
   ]
 
   return (

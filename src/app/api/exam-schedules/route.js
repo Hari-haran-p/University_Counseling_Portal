@@ -7,7 +7,7 @@ export async function GET() {
     let client;
     try {
         client = await pool.connect();
-        const query = "SELECT * FROM exam_schedules";
+        const query = "SELECT * FROM exam_schedules ORDER BY start_time";
         const result = await client.query(query);
 
         //Format the start_time and the end_time

@@ -18,10 +18,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  // State for sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  
   const router = useRouter();
-  const sidebarRef = useRef(null);  // Ref for the sidebar
-  const sidebarWidth = "64";  // Width of the sidebar in rem
+  const sidebarRef = useRef(null); 
+  const sidebarWidth = "64";
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }) {
                 <Input type="search" placeholder="Search..." className="pl-8 w-64" />
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
@@ -132,7 +132,7 @@ export default function AdminLayout({ children }) {
                   <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </div> */}
           </div>
         </header>
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">{children}</main>
@@ -149,8 +149,9 @@ function AdminSidebar({ toggleSidebar }) {  //Recieve toggle side bar function h
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/exam", label: "Manage Exam", icon: BookCheck },
     { href: "/admin/results", label: "View Exam Results", icon: HelpCircle },
+    { href: "/admin/counseling", label: "Counseling", icon: FileText }, // ADDED counseling
     { href: "/admin/users", label: "Users", icon: Users },
-    { href: "/admin/settings", label: "Settings", icon: Settings },
+    // { href: "/admin/settings", label: "Settings", icon: Settings },
   ]
 
   return (

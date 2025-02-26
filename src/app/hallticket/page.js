@@ -10,27 +10,20 @@ import Cookies from "js-cookie";
 const HallTicketPage = () => {
   const [hallTicketData, setHallTicketData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false); // State to control preview visibility
-  const [errorMessage, setErrorMessage] = useState(null); // State for specific error messages
-  const user = JSON.parse(Cookies.get("userData"));    //REMOVE: Replace with your actual user ID retrieval mechanism
-  console.log("user",user);
-  
-  // useEffect(() => {
-  // }, []);
+  const [showPreview, setShowPreview] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null); 
+  const user = JSON.parse(Cookies.get("userData"));    
 
   const generateHallTicket = async () => {
     setIsLoading(true);
     setErrorMessage(null); // Clear any previous error messages
     try {
-      const response = await axios.get(`/api/hall-ticket?userId=${user.id}`); // Add validation for token is not found
+      const response = await axios.get(`/api/hall-ticket?userId=${parseInt(user.id)}`);
 
       if (response.data && response.data.hallTicketData) {
         setHallTicketData(response.data.hallTicketData);
-        setShowPreview(true); // Show preview after successful generation
+        setShowPreview(true);
       } else {
-        // Handle specific error cases
-        console.log(response.data);
-        
         switch (response.data.errorType) {
           case "missing_parameter":
             setErrorMessage("Missing user ID. Please contact support.");

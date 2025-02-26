@@ -17,7 +17,7 @@ export async function sendEmail(email, password) {
       from: process.env.EMAIL_USER, // Replace with your email
       to: email,
       subject: "Your Registration Details",
-      text: `Thank you for registering! Your temporary password is: ${password}. Please change it after logging in.`,
+      text: `Thank you for registering! Your Login password is: ${password}.`,
     };
 
     await transporter.sendMail(mailOptions);

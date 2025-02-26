@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server'; // Import NextResponse
 import { pool } from '@/db/db';
 
 export async function POST(req) {
-  console.log("skjujgb");
   
   try {
     const body = await req.json(); // Parse the request body

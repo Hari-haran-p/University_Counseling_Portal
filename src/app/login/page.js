@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "react-fox-toast";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 
 export default function LoginPage() {
+
   const router = useRouter();
   const [formData, setFormData] = useState({
     username: "",
@@ -39,21 +40,29 @@ export default function LoginPage() {
       const response = await axios.post("/api/login", formData);
 
       if (response.status === 200) {
-        toast.success("Login successful!");
-        Cookies.set("userData",JSON.stringify(response.data.userData))
+        toast.success("Login successful!", {
+          className: "bg-primary-800 text-white rounded-3xl",
+        });
+        Cookies.set("userData", JSON.stringify(response.data.userData))
         const role = JSON.parse(Cookies.get("userData")).role;
         if (role === "admin") router.push("/admin");
         if (role === "user") router.push("/");
       } else {
-        toast.error(response.data.message || "Login failed. Please try again.");
+        toast.error(response.data.message || "Login failed. Please try again.", {
+          className: "bg-primary-600 text-white rounded-3xl",
+        });
       }
     } catch (error) {
       if (error.name === "ZodError") {
         const firstErrorMessage = error.errors[0].message;
-        toast.error(firstErrorMessage);
+        toast.error(firstErrorMessage, {
+          className: "bg-primary-600 text-white rounded-3xl",
+        });
       } else {
         toast.error(
-          error.response?.data?.message || "An error occurred during login."
+          error.response?.data?.message || "An error occurred during login.", {
+          className: "bg-primary-600 text-white rounded-3xl",
+        }
         );
       }
       console.error("Login error:", error);
@@ -92,11 +101,12 @@ export default function LoginPage() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ClipLoader color="#ffffff" size={20} /> // Replace text with spinner
+              <ClipLoader color="#ffffff" size={20} />
             ) : (
               "Login"
             )}
           </Button>
+          <a className="text-sm w-full mt-3 underline text-blue-700" href="/registration">New user ? Click here to signup !!</a>
         </form>
       </div>
     </div>

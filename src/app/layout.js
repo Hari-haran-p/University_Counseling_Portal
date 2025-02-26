@@ -5,7 +5,7 @@ import { Inter } from "next/font/google";
 import Layout from "@/components/Layout";
 import AdminLayout from "@/components/AdminLayout";
 import React, { useState, useEffect } from "react"; // Import useState and useEffect
-import { ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-fox-toast"
 import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     setIsAdminRoute(pathname?.startsWith("/admin") || false);
-    setIsLoginRoute(pathname?.startsWith("/login") || false);
+    setIsLoginRoute(pathname?.startsWith("/login") || pathname?.startsWith("/registration") || false);
   }, [pathname]);
 
 
@@ -25,7 +25,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ToastContainer />
+        <ToastContainer
+          position="top-right"
+        />
         {isLoginRoute
           ?
           children

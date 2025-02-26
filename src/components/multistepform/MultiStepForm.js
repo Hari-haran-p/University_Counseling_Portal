@@ -7,7 +7,7 @@ import { Stepper } from "@/components/ui/stepper";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { toast } from "react-toastify";
+import { toast } from "react-fox-toast";
 import "react-toastify/dist/ReactToastify.css";
 import { PersonalDetails } from "@/components/multistepform/steps/PersonalDetails";
 import { EducationalDetails } from "@/components/multistepform/steps/EducationalDetails";

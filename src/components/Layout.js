@@ -125,7 +125,7 @@ export default function Layout({ children }) {
                 />
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
@@ -162,7 +162,7 @@ export default function Layout({ children }) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
+            </div> */}
           </div>
         </header>
         <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
