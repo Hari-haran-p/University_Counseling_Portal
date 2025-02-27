@@ -135,13 +135,13 @@ export default function MultiStepForm() {
         response = { status: 200 };
       }
 
-      if (response?.status === 200) {
+      // if (response?.status === 200) {
         toast.success("Data saved successfully!");
-      } else {
-        toast.error(
-          response?.data?.message || "Failed to save data. Please try again."
-        );
-      }
+      // } else {
+      //   toast.error(
+      //     response?.data?.message || "Failed to save data. Please try again."
+      //   );
+      // }
 
       if (currentStep < steps.length - 1) {
         setCurrentStep((prev) => prev + 1);

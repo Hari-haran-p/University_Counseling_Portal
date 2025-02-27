@@ -80,7 +80,7 @@ const AdminApplicationPage = () => {
     // "educational_city",
     "month_passout",
     "year_passout",
-    "declaration",
+    // "declaration",
   ];
 
   const tableColumns = ["user_id", "username", "name", "mobno", "email", "dob", "gender", "community"]
