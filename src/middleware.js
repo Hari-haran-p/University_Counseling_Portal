@@ -9,6 +9,7 @@ const PUBLIC_ROUTES = [
   "/api/registration",
   "/api/logout",
 ];
+
 const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || "your_secret_key"
 ); // Use TextEncoder for Edge compatibility
