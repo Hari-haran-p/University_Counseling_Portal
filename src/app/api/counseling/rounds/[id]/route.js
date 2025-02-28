@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { pool } from "@/db/db";
 
 export async function PUT(req, {params}) {
-    const {id} = params
+    const {id} = await params;
+    
     let client;
     try {
         const { is_active } = await req.json();

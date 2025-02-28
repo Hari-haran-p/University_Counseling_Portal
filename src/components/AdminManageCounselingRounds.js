@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { icons, Loader2 } from "lucide-react"
 import {
     Table,
     TableBody,
@@ -24,6 +24,8 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { format, parseISO } from "date-fns";
+import { toast } from "react-fox-toast"
+import SuccessIcon from "./ui/toast-success"
 
 const ManageCounselingRounds = () => {
     const [counselingRounds, setCounselingRounds] = useState([]);
@@ -45,7 +47,7 @@ const ManageCounselingRounds = () => {
             setCounselingRounds(response.data);
         } catch (error) {
             console.error("Error fetching counseling rounds:", error);
-            alert("Failed to load counseling rounds.");
+            toast.error("Failed to load counseling rounds.");
         } finally {
             setIsLoading(false);
         }
@@ -56,11 +58,14 @@ const ManageCounselingRounds = () => {
             // Add logic to create a new round
             const response = await axios.post("/api/counseling/rounds", newRound);
             if (response.status == 200) {
+                toast.success("Round created successfully", {
+                    icons: <SuccessIcon />
+                });
                 fetchRounds()
             }
         } catch (error) {
             console.error("Error creating counseling round:", error);
-            alert("Failed to create counseling round.");
+            toast.error("Round creation failed");
         } finally {
             setIsLoading(false);
         }
@@ -69,19 +74,23 @@ const ManageCounselingRounds = () => {
         const { name, value } = e.target;
         setNewRound({ ...newRound, [name]: value });
     };
-    const handleActiveClick = async(id,active)=>{
-        try{
+    const handleActiveClick = async (id, active) => {
+        try {
             // Handle Active logic
-            const response = await axios.put(`/api/counseling/rounds/${id}`,{is_active: active});
-            if (response.status == 200) {
+            const response = await axios.put(`/api/counseling/rounds/${id}`, { is_active: active });
+            if (response.status == 201) {
+                toast.success(`Round ${active ? "activated" : "deactivated"} successfully`, {
+                    icons: <SuccessIcon />
+                });
                 fetchRounds()
             }
         }
-        catch(e){
+        catch (e) {
             console.error("Error change counseling round active:", e);
-            alert("Failed to change counseling round.");
+            toast.error("Round activation failed");
         }
     }
+
     return (
         <div className="space-y-4">
             <h2 className="text-xl font-semibold mb-2">Manage Counseling Rounds</h2>
@@ -113,9 +122,9 @@ const ManageCounselingRounds = () => {
                                 <TableCell>{round.is_active ? "Yes" : "No"}</TableCell>
                                 <TableCell>
                                     {round.is_active === false ?
-                                        <Button onClick={() => handleActiveClick(round.id,true)}>Activate</Button>
+                                        <Button onClick={() => handleActiveClick(round.id, true)}>Activate</Button>
                                         :
-                                        <Button onClick={() => handleActiveClick(round.id,false)}>Disable</Button>
+                                        <Button onClick={() => handleActiveClick(round.id, false)}>Disable</Button>
                                     }
                                 </TableCell>
                             </TableRow>

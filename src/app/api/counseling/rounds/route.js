@@ -6,7 +6,7 @@ export async function GET() {
     let client;
     try {
         client = await pool.connect();
-        const query = "SELECT * FROM counseling_rounds";
+        const query = "SELECT * FROM counseling_rounds ORDER BY round_number";
         const result = await client.query(query);
         return NextResponse.json(result.rows, { status: 200 });
     } catch (error) {

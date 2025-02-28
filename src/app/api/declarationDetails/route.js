@@ -10,8 +10,8 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { photo, signature, declaration} = body;
-    const userId = req.headers.get("userid");
-
+    
+const userId = req.headers.get("userid");
     if (!userId) {
       console.error("No user ID found");
       return new NextResponse(

@@ -4,11 +4,7 @@ import { pool } from "@/db/db";
 
 export async function POST(req) {
     try {
-        const { allocationRound } = await req.json(); // You might not need this anymore
-
-        if (allocationRound === undefined) {
-            return NextResponse.json({ message: "Missing allocationRound" }, { status: 400 });
-        }
+        // const { allocationRound } = await req.json(); // No longer needed, we use the active round.
 
         let client;
         try {
@@ -48,7 +44,8 @@ export async function POST(req) {
         FROM
           student_preferences sp
         JOIN exam_results_ranking urv ON sp.user_id = urv.user_id
-        ORDER BY urv.overall_rank ASC;
+        WHERE sp.counseling_round_id = $1  
+        ORDER BY urv.community, urv.community_rank ASC, urv.overall_rank ASC;
       `;
             const studentDataResult = await client.query(studentDataQuery, [activeRoundId]); // Add activeRoundId
             const studentData = studentDataResult.rows;
@@ -90,15 +87,25 @@ export async function POST(req) {
                         if (seatsAvailable > seatsAllocatedSoFar) {
                             // Assign the seat
                             const assignSeatQuery = `
-                                INSERT INTO allotted_seats (user_id, counseling_round_id, department_id, allotment_date)
-                                VALUES ($1, $2, $3, NOW())
+                                INSERT INTO assigned_seats (user_id, counseling_round_id, department_id)
+                                VALUES ($1, $2, $3)
                             `;
                             const assignSeatValues = [student.user_id, activeRoundId, preferredDepartmentId];
 
                             try {
                                 await client.query(assignSeatQuery, assignSeatValues);
-                                console.log(`Assigned seat to user ${student.user_id} in department ${preferredDepartmentId}, round ${allocationRound}`);
+                                console.log(`Assigned seat to user ${student.user_id} in department ${preferredDepartmentId}`);
                                 seatAssigned = true;
+
+                                // *** CRITICAL: Decrement available seats ***
+                                const decrementQuery = `
+                                    UPDATE seat_allocations
+                                    SET seats_available = seats_available - 1
+                                    WHERE department_id = $1 AND community = $2 AND counseling_round_id = $3;
+                                `;
+                                const decrementValues = [preferredDepartmentId, student.community, activeRoundId];
+                                await client.query(decrementQuery, decrementValues);
+
 
                                 // Update allocated seats count (using nested object approach for safety)
                                 if (!allocatedSeats[preferredDepartmentId]) {
@@ -107,9 +114,11 @@ export async function POST(req) {
                                 allocatedSeats[preferredDepartmentId][student.community] = seatsAllocatedSoFar + 1;
                             } catch (assignError) {
                                 console.error(`Failed to assign seat to user ${student.user_id} in department ${preferredDepartmentId}:`, assignError);
+                                // Consider throwing the error here to trigger the rollback, or log it and continue.
+                                // throw assignError; // Uncomment to rollback on error
                             }
 
-                            break;
+                            break; // Move to the next student
                         }
                     }
 
