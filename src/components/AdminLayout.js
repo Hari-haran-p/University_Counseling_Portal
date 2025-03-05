@@ -3,7 +3,21 @@
 import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Users, GraduationCap, FileText, Settings, LogOut, Menu, Bell, Search, HelpCircle, BookCheck } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  FileText,
+  Settings,
+  LogOut,
+  Menu,
+  Bell,
+  Search,
+  HelpCircle,
+  BookCheck,
+  Wrench,
+  BrainCircuit
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,11 +30,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 export default function AdminLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userData , setUserData] = useState([]);
   const router = useRouter();
-  const sidebarRef = useRef(null); 
+  const sidebarRef = useRef(null);
   const sidebarWidth = "64";
 
   const toggleSidebar = () => {
@@ -33,13 +49,28 @@ export default function AdminLayout({ children }) {
     toast.success("Logged out successfully!");
   };
 
+  const getUser = async () => {
+    try {
+      const response = await axios.get("/api/get-user");
+      setUserData(response.data);
+    } catch (error) {
+      console.log({ "error geting user data": error });
+    }
+  };
+
+  useEffect(()=>{
+    getUser();
+  },[])
+
+  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         isSidebarOpen &&
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target) &&
-        window.innerWidth < 768  // Adjust breakpoint as needed
+        window.innerWidth < 768
       ) {
         toggleSidebar();
       }
@@ -60,7 +91,8 @@ export default function AdminLayout({ children }) {
         className={`
           md:flex w-${sidebarWidth} flex-col bg-primary-800 text-white
           fixed top-0 left-0 h-full z-50
-          transition-transform duration-300 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          transition-transform duration-300 transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0
         `}
       >
@@ -68,7 +100,7 @@ export default function AdminLayout({ children }) {
           <h1 className="text-2xl font-bold">Admin Portal</h1>
         </div>
         <nav className="flex-1 overflow-y-auto">
-          <AdminSidebar toggleSidebar={toggleSidebar} /> 
+          <AdminSidebar toggleSidebar={toggleSidebar} />
         </nav>
         <div className="p-4">
           <Button
@@ -96,16 +128,20 @@ export default function AdminLayout({ children }) {
                 variant="ghost"
                 size="icon"
                 className="md:hidden"
-                onClick={toggleSidebar}  // Attach the toggle function
+                onClick={toggleSidebar} // Attach the toggle function
               >
                 <Menu className="h-6 w-6" />
               </Button>
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input type="search" placeholder="Search..." className="pl-8 w-64" />
+                <Input
+                  type="search"
+                  placeholder="Search..."
+                  className="pl-8 w-64"
+                />
               </div>
             </div>
-            {/* <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
@@ -115,44 +151,60 @@ export default function AdminLayout({ children }) {
                     variant="ghost"
                     className="relative h-8 w-8 rounded-full"
                   >
-                    <img src="/placeholder.svg?height=32&width=32" alt="Admin" className="rounded-full" />
+                    <img
+                      src="/placeholder.svg?height=32&width=32"
+                      alt="Admin"
+                      className="rounded-full"
+                    />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">Admin User</p>
-                      <p className="text-xs leading-none text-muted-foreground">admin@example.com</p>
+                      <p className="text-sm font-medium leading-none">
+                        {userData[0]?.role || "admin"}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {userData[0]?.username || "admin@gmail.com"}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+                  {/* <DropdownMenuSeparator />
                   <DropdownMenuItem>Profile</DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                  <DropdownMenuSeparator /> */}
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Log out
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div> */}
+            </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6">
+          {children}
+        </main>
       </div>
     </div>
   );
 }
 
-function AdminSidebar({ toggleSidebar }) {  //Recieve toggle side bar function here.
-  const pathname = usePathname()
+function AdminSidebar({ toggleSidebar }) {
+  //Recieve toggle side bar function here.
+  const pathname = usePathname();
 
   const links = [
     { href: "/admin/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/applications", label: "Applications", icon: FileText },
     { href: "/admin/exam", label: "Manage Exam", icon: BookCheck },
     { href: "/admin/results", label: "View Exam Results", icon: HelpCircle },
-    { href: "/admin/counseling", label: "Counseling", icon: FileText }, // ADDED counseling
+    { href: "/admin/counseling", label: "Counseling", icon: BrainCircuit }, // ADDED counseling and changed icon
     { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/tools", label: "Tools", icon: Wrench }, // ADDED tools and changed icon
+
     // { href: "/admin/settings", label: "Settings", icon: Settings },
-  ]
+  ];
+
 
   return (
     <ul className="space-y-2 py-4">
@@ -160,11 +212,12 @@ function AdminSidebar({ toggleSidebar }) {  //Recieve toggle side bar function h
         <li key={link.href}>
           <Link
             href={link.href}
-            onClick={toggleSidebar}  // Call toggle side bar on link click
-            className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg ${pathname === link.href
+            onClick={toggleSidebar} // Call toggle side bar on link click
+            className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg ${
+              pathname === link.href
                 ? "bg-primary-700 text-white"
                 : "text-primary-100 hover:bg-primary-700 hover:text-white"
-              }`}
+            }`}
           >
             <link.icon className="mr-3 h-5 w-5" />
             {link.label}
@@ -172,5 +225,5 @@ function AdminSidebar({ toggleSidebar }) {  //Recieve toggle side bar function h
         </li>
       ))}
     </ul>
-  )
+  );
 }

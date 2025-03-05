@@ -1,52 +1,52 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { LogOut, Menu, Bell, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { LogOut, Menu, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { UserSidebar } from "./UserSidebar";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import axios from "axios"; // Import axios
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
+import { UserSidebar } from "./UserSidebar"
+import { toast } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import axios from "axios"
+import { NotificationPanel } from "./NotificationPanel"
 
 export default function Layout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [userData, setUserData] = useState([])
+
+  const router = useRouter()
 
   const handleLogout = async () => {
     try {
       // Make a request to the /api/logout endpoint
-      const response = await axios.post("/api/logout");
+      const response = await axios.post("/api/logout")
 
       if (response.status === 200) {
         // Redirect to the login page
-        router.push("/login");
-        toast.success("Logged out successfully!");
+        router.push("/login")
+        toast.success("Logged out successfully!")
       } else {
-        toast.error("Logout failed. Please try again.");
+        toast.error("Logout failed. Please try again.")
       }
     } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("An error occurred during logout.");
+      console.error("Logout error:", error)
+      toast.error("An error occurred during logout.")
     }
   }
-  const sidebarRef = useRef(null);  // Ref for the sidebar
-  const sidebarWidth = "64"; // The width of the sidebar in rem
+  const sidebarRef = useRef(null) // Ref for the sidebar
+  const sidebarWidth = "64" // The width of the sidebar in rem
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-
+    setIsSidebarOpen(!isSidebarOpen)
+  }
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -56,22 +56,37 @@ export default function Layout({ children }) {
         !sidebarRef.current.contains(event.target) &&
         window.innerWidth < 768 // Only trigger on mobile (adjust breakpoint as needed)
       ) {
-        toggleSidebar();
+        toggleSidebar()
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);  // Use mousedown for better responsiveness
+    document.addEventListener("mousedown", handleClickOutside) // Use mousedown for better responsiveness
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside); // Remove the event listener on unmount
-    };
-  }, [isSidebarOpen]);
+      document.removeEventListener("mousedown", handleClickOutside) // Remove the event listener on unmount
+    }
+  }, [isSidebarOpen]) // Added isSidebarOpen to dependencies
+
+  const getUser = async () => {
+    try {
+      const response = await axios.get("/api/get-user")
+      setUserData(response.data)
+    } catch (error) {
+      console.log({ "error geting user data": error })
+    }
+  }
+
+  useEffect(() => {
+    getUser()
+  }, []) // Added empty dependency array to useEffect
+
+  console.log(userData)
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <aside
-        ref={sidebarRef}  // Attach the ref to the sidebar
+        ref={sidebarRef} // Attach the ref to the sidebar
         className={`
           md:flex w-${sidebarWidth} flex-col bg-primary-800 text-white
           fixed top-0 left-0 h-full z-50
@@ -83,9 +98,7 @@ export default function Layout({ children }) {
         <div className="p-4">
           <h1 className="text-2xl font-bold">University Portal</h1>
         </div>
-        <nav className="flex-1 overflow-y-auto">
-          {<UserSidebar toggleSidebar={toggleSidebar} />}
-        </nav>
+        <nav className="flex-1 overflow-y-auto">{<UserSidebar toggleSidebar={toggleSidebar} />}</nav>
         <div className="p-4">
           <Button
             variant="ghost"
@@ -108,33 +121,20 @@ export default function Layout({ children }) {
         <header className="bg-white shadow-sm">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={toggleSidebar}
-              >
+              <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
                 <Menu className="h-6 w-6" />
               </Button>
               <div className="relative">
                 <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  className="pl-8 w-64"
-                />
+                <Input type="search" placeholder="Search..." className="pl-8 w-64" />
               </div>
             </div>
-            {/* <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-5 w-5" />
-              </Button>
+            <div className="flex items-center space-x-4">
+              {/* Replace the Bell button with the NotificationPanel component */}
+              <NotificationPanel />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
-                  >
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <img
                       src="https://imgs.search.brave.com/XoCvQPCR8cwB92wTx6BVnT53TrDFDtYoR58BYS3mj6M/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvMTE5/NjA4Mzg2MS92ZWN0/b3Ivc2ltcGxlLW1h/bi1oZWFkLWljb24t/c2V0LmpwZz9zPTYx/Mng2MTImdz0wJms9/MjAmYz1hOGZ3ZFg2/VUtVVkNPZWROX3Aw/cFBzenU4QjRmNnNq/YXJEbVVHSG5ndmRN/PQ"
                       alt="User"
@@ -145,30 +145,21 @@ export default function Layout({ children }) {
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        John Doe
-                      </p>
+                      <p className="text-sm font-medium leading-none">{userData[0]?.role || "user"}</p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        john.doe@example.com
+                        {userData[0]?.username || "user@gmail.com"}
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    Log out
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div> */}
+            </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">{children}</main>
       </div>
     </div>
-  );
+  )
 }
+

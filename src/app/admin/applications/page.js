@@ -88,7 +88,7 @@ const AdminApplicationPage = () => {
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initialVisibility = {};
     allColumnNames.forEach((column) => {
-      initialVisibility[column] = true; // Initially all true (visible)
+      initialVisibility[column] = true;
     });
     return initialVisibility;
   });
