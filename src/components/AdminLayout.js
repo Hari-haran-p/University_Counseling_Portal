@@ -16,7 +16,8 @@ import {
   HelpCircle,
   BookCheck,
   Wrench,
-  BrainCircuit
+  BrainCircuit,
+  UserRound
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -142,20 +143,17 @@ export default function AdminLayout({ children }) {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon">
+              {/* <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
-              </Button>
+              </Button> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
                     className="relative h-8 w-8 rounded-full"
                   >
-                    <img
-                      src="/placeholder.svg?height=32&width=32"
-                      alt="Admin"
-                      className="rounded-full"
-                    />
+                                      <UserRound className="h-5 w-5" />
+
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
