@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 import { format } from "date-fns";
 
 export function PersonalDetails({ formData, setFormData, errors, setErrors }) {
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const [loading, setLoading] = useState(true);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -278,13 +278,42 @@ export function PersonalDetails({ formData, setFormData, errors, setErrors }) {
           </div>
         </div>
         <div className="space-y-2">
+
           <Label htmlFor="community">Community</Label>
+          <Select
+            htmlFor="community"
+            value={formData.community || ""}
+            onValueChange={(value) => {
+              setFormData((prevData) => ({
+                ...prevData,
+                community: value,
+              }));
+              setErrors((prevErrors) => ({
+                ...prevErrors,
+                community: undefined,
+              }));
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Community" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="OC">OC</SelectItem>
+              <SelectItem value="BC">BC</SelectItem>
+              <SelectItem value="MBC">MBC</SelectItem>
+              <SelectItem value="SC">SC</SelectItem>
+              <SelectItem value="ST">ST</SelectItem>
+            </SelectContent>
+          </Select>
+
+
+          {/* <Label htmlFor="community">Community</Label>
           <Input
             id="community"
             placeholder="Enter community"
             value={formData.community || ""}
             onChange={handleChange}
-          />
+          /> */}
           {errors.community && (
             <p className="text-red-500 text-sm">{errors.community}</p>
           )}

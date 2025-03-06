@@ -6,11 +6,11 @@ export async function GET() {
   let client;
   try {
     client = await pool.connect();
-    const query = "SELECT result_date, preference_start_date, preference_end_date FROM dates WHERE id = 1";  //Get row by id 
+    const query = "SELECT start_date as preference_start_date, end_date as preference_end_date FROM counseling_rounds WHERE is_active = true";
     const result = await client.query(query);
 
     if (result.rows.length === 0) {
-      return NextResponse.json([], { status: 200 }); // Return empty array if no data
+      return NextResponse.json([], { status: 200 });
     }
 
     return NextResponse.json(result.rows, { status: 200 });

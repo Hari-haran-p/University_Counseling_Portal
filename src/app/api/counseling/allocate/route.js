@@ -150,5 +150,5 @@ export async function POST(req) {
     } catch (error) {
         console.error("Error parsing request:", error);
         return NextResponse.json({ message: "Invalid request body" }, { status: 400 });
-    }
+    } 
 }

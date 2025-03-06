@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { pool } from "@/db/db";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
-import fs from 'fs'; // Import the 'fs' module
+import fs from 'fs';
 import path from 'path';
+import { format } from "date-fns";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -30,32 +31,24 @@ export async function GET(req) {
 
     // 2. Fetch Personal Details and Photo Filename
     const detailsQuery = `
-      SELECT dd.photo_path
-      FROM declaration_details dd
-      WHERE dd.user_id = $1
-    `;
+          SELECT pd.name, pd.email, dd.photo_filename
+          FROM personal_details pd
+          LEFT JOIN declaration_details dd ON pd.user_id = dd.user_id
+          WHERE pd.user_id = $1
+        `;
     const detailsValues = [userId];
     const detailsResult = await client.query(detailsQuery, detailsValues);
     const details = detailsResult.rows[0] || {};
 
-    const personalQuery = `
-    SELECT dd.name, dd.email, dd.gender, dd.dob
-    FROM personal_details dd
-    WHERE dd.user_id = $1
-  `;
-  const personalValues = [userId];
-  const personalResult = await client.query(personalQuery, personalValues);
-  const personal = personalResult.rows[0] || {};
-
-    // 3. Fetch Nearest Exam Schedule
+    // 3. Fetch Nearest *ACTIVE* Exam Schedule
     const scheduleQuery = `
-      SELECT id, exam_name, start_time, end_time
-      FROM exam_schedules
-      WHERE start_time > NOW()
-      ORDER BY start_time ASC
-      LIMIT 1
-    `;
-
+          SELECT id, exam_name, start_time, end_time
+          FROM exam_schedules
+          WHERE is_active = true  -- Only get the active schedule
+          AND start_time > NOW()  -- Only future or currently running exams
+          ORDER BY start_time ASC
+          LIMIT 1
+        `;
     const scheduleResult = await client.query(scheduleQuery);
 
     if (scheduleResult.rows.length === 0) {
@@ -68,37 +61,44 @@ export async function GET(req) {
 
     // --- University Header (Centered) ---
     doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold'); // Use a bolder font
-    doc.text("Panimalar University", 105, 20, { align: "center" }); // Center align
+    doc.setFont('helvetica', 'bold');
+    doc.text("Panimalar University", 105, 20, { align: "center" });
     doc.setFontSize(16);
     doc.setFont('helvetica', 'normal');
     doc.text("Entrance Exam Hall Ticket", 105, 30, { align: "center" });
-    doc.line(20, 35, 190, 35);  // Horizontal line after header
+    doc.line(20, 35, 190, 35);
 
     // --- User Photo ---
-    if (details.photo_path) {
+    if (details.photo_filename) {
       try {
-        const imagePath = path.join(process.cwd(), 'public', 'uploads', details.photo_path); // Correct path
+        const imagePath = path.join(process.cwd(), 'public', 'uploads', details.photo_filename); // Correct path
+        // console.log("Image Path:", imagePath); // Debugging line
         const imgData = fs.readFileSync(imagePath, 'base64'); // Read as base64
-        doc.addImage(`data:image/jpeg;base64,${imgData}`, "JPEG", 150, 45, 40, 40); // Add image, adjust position/size
+        //Helper function to getMimeType
+        const mimeType = getMimeType(details.photo_filename);
+        if (!mimeType) {
+          throw new Error('Unsupported image format');
+        }
+
+        doc.addImage(`data:${mimeType};base64,${imgData}`, 30, 40, 40, 40); // Add image, adjust position/size
       } catch (imageError) {
         console.error("Error loading image:", imageError);
         // Optionally, add a placeholder image or text if the image fails to load
+        doc.text("Image not available", 150, 55); // Placeholder text.
       }
     }
-
 
     // --- User Details ---
     doc.setFontSize(12);
     let yOffset = 50;
 
-    // doc.text(`User ID: ${user.id}`, 20, yOffset);
-    // yOffset += 10;
-    // doc.text(`Username: ${user.username}`, 20, yOffset);
-    // yOffset += 10;
-    doc.text(`Name: ${personal.name || "N/A"}`, 20, yOffset);
+    doc.text(`User ID: ${user.id}`, 20, yOffset);
     yOffset += 10;
-    doc.text(`Email: ${personal.email || "N/A"}`, 20, yOffset);
+    doc.text(`Username: ${user.username}`, 20, yOffset);
+    yOffset += 10;
+    doc.text(`Name: ${details.name || "N/A"}`, 20, yOffset);
+    yOffset += 10;
+    doc.text(`Email: ${details.email || "N/A"}`, 20, yOffset);
     yOffset += 15;
 
     // --- Exam Details ---
@@ -108,10 +108,10 @@ export async function GET(req) {
     yOffset += 10;
     doc.text(`Exam Name: ${schedule.exam_name}`, 20, yOffset);
     yOffset += 10;
-    //Use toLocalString() to format date
-    doc.text(`Start Time: ${schedule?.start_time?.toISOString().split("T")[0]}, ${schedule?.start_time?.toISOString().split("T")[1].slice(0, 8)}`, 20, yOffset);
+    // Use toLocaleString() to format date
+    doc.text(`Start Time: ${new Date(schedule.start_time).toLocaleString()}`, 20, yOffset);
     yOffset += 10;
-    doc.text(`End Time: ${schedule?.end_time?.toISOString().split("T")[0]}, ${schedule?.end_time?.toISOString().split("T")[1].slice(0, 8)}`, 20, yOffset);
+    doc.text(`End Time: ${new Date(schedule.end_time).toLocaleString()}`, 20, yOffset);
     yOffset += 15;
 
     // --- Instructions (Example) ---
@@ -121,22 +121,18 @@ export async function GET(req) {
     yOffset += 10;
 
     const instructions = [
-      "1. Ensure you have a stable internet connection before starting the exam.",
-      "2. Log in to the examination portal at least 15 minutes before the exam begins.",
-      "3. Keep a valid photo ID ready for online verification, if required.",
-      "4. Do not open any other tabs or applications during the exam, as this may lead to disqualification.",
-      "5. Follow the on-screen instructions carefully and submit your answers before the time limit expires."
+      "1. Please arrive at the examination hall at least 30 minutes before the start time.",
+      "2. Bring a valid photo ID (e.g., driver's license, passport) for verification.",
+      "3. No electronic devices (phones, calculators, smartwatches) are allowed.",
+      "4. Follow the invigilator's instructions carefully.",
     ];
-    
-    //Use the loop for instructions
-    instructions.forEach((instruction) => {
-      doc.text(instruction, 20, yOffset, { maxWidth: 170 }); // Wrap long text
-      yOffset += 10;
+    instructions.forEach((instruction, index) => {
+      doc.text(instruction, 20, yOffset);
+      yOffset += 5; // Increment yOffset for each line of instruction
     });
-
     // --- Footer (Optional) ---
     doc.setFontSize(10);
-    doc.text("Generated on: " + new Date().toLocaleString(), 20, 280); 
+    doc.text("Generated on: " + new Date().toLocaleString(), 20, 280);
 
     // Convert PDF to data URL
     const pdfBase64 = doc.output('datauristring');
@@ -149,5 +145,22 @@ export async function GET(req) {
     if (client) {
       client.release();
     }
+  }
+}
+
+// Helper function to get MIME type based on file extension
+function getMimeType(filename) {
+  const extension = filename.split('.').pop().toLowerCase();
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    // Add more image types as needed
+    default:
+      return null; // Unknown or unsupported type
   }
 }

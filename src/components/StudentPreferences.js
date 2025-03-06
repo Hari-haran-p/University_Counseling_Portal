@@ -82,10 +82,9 @@ const StudentPreferences = () => {
                 setIsLoading(false);
             }
         };
-        // if(userId){
         fetchData();
-        // }
-    }, [router]); // Add router and userId to the dependency array
+        
+    }, [router]);
 
 
     const handlePreferenceChange = (index, departmentId) => {

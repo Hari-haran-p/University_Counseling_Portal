@@ -156,8 +156,8 @@ const ManageSeats = () => {
           </CardContent>
         </Card>
       ))}
-      <div className="flex items-center space-x-2 mb-4">
-        <Label htmlFor="allocationRound">Allocation Round:</Label>
+      <div className="flex items-center justify-end space-x-2 mb-4">
+        {/* <Label htmlFor="allocationRound">Allocation Round:</Label>
         <Input
           type="number"
           id="allocationRound"
@@ -166,7 +166,7 @@ const ManageSeats = () => {
           onChange={(e) => setAllocationRound(parseInt(e.target.value, 10) || 1)}
           className="w-24"
           min="1"
-        />
+        /> */}
         <Button onClick={handleAllocateSeats} className="bg-primary-800" disabled={isLoading}>
           {isLoading ? (
             <>

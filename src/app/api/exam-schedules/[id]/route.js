@@ -43,7 +43,7 @@ export async function PUT(req, { params }) {
         const query = `
             UPDATE exam_schedules
             SET exam_name = $1, start_time = $2, end_time = $3, is_active = $4
-            WHERE id = $5
+            WHERE id = $5 
             RETURNING *;
         `;
         const values = [exam_name, start_time, end_time, is_active, id];

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Trash2, Eye, Calendar, Loader2, Edit } from "lucide-react";
+import { Trash2, Eye, Loader2, Edit, CircleCheckBig, CircleX, icons } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "react-fox-toast";
+import SuccessIcon from "@/components/ui/toast-success";
 
 const AdminQuestionsPage = () => {
   const [questions, setQuestions] = useState([]);
@@ -42,6 +43,7 @@ const AdminQuestionsPage = () => {
   const [editedScheduleData, setEditedScheduleData] = useState({});
   const [isSaving, setIsSaving] = useState(false); // Track saving state
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isActivating, setIsActivating] = useState(false);
   const [isAddingSchedule, setIsAddingSchedule] = useState(false); // Track adding schedule state
 
   useEffect(() => {
@@ -122,52 +124,52 @@ const AdminQuestionsPage = () => {
     }
   };
 
-    const addExamSchedule = async () => {
-        setIsAddingSchedule(true); // Set adding state to true
-        try {
-            const response = await axios.post("/api/exam-schedules", newSchedule);
-            if (response.status === 201) {
-                toast.success("Exam schedule added successfully!", {
-                    className: "bg-primary-800 text-white rounded-3xl",
-                });
-                setNewSchedule({
-                    exam_name: "",
-                    start_time: "",
-                    end_time: "",
-                });
-                fetchExamSchedules();
-            } else {
-                toast.error("Failed to add exam schedule.", {
-                    className: "bg-primary-600 text-white rounded-3xl",
-                });
-            }
-        } catch (error) {
-            console.error("Error adding exam schedule:", error);
-            toast.error("Failed to add exam schedule.", {
-                className: "bg-primary-600 text-white rounded-3xl",
-            });
-        } finally {
-            setIsAddingSchedule(false); // Reset adding state
-        }
-    };
+  const addExamSchedule = async () => {
+    setIsAddingSchedule(true); // Set adding state to true
+    try {
+      const response = await axios.post("/api/exam-schedules", newSchedule);
+      if (response.status === 201) {
+        toast.success("Exam schedule added successfully!", {
+          className: "bg-primary-800 text-white rounded-3xl",
+        });
+        setNewSchedule({
+          exam_name: "",
+          start_time: "",
+          end_time: "",
+        });
+        fetchExamSchedules();
+      } else {
+        toast.error("Failed to add exam schedule.", {
+          className: "bg-primary-600 text-white rounded-3xl",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding exam schedule:", error);
+      toast.error("Failed to add exam schedule.", {
+        className: "bg-primary-600 text-white rounded-3xl",
+      });
+    } finally {
+      setIsAddingSchedule(false); // Reset adding state
+    }
+  };
 
-    const deleteExamSchedule = async (id) => {
-        setIsDeleting(true); // Set deleting state
-        try {
-            await axios.delete(`/api/exam-schedules/${id}`);
-            fetchExamSchedules(); // Refresh schedule list
-            toast.success("Exam schedule deleted successfully!", {
-                className: "bg-primary-800 text-white rounded-3xl",
-            });
-        } catch (error) {
-            console.error("Error deleting exam schedule:", error);
-            toast.error("Failed to delete exam schedule.", {
-                className: "bg-primary-600 text-white rounded-3xl",
-            });
-        } finally {
-            setIsDeleting(false); // Reset deleting state
-        }
-    };
+  const deleteExamSchedule = async (id) => {
+    setIsDeleting(true); // Set deleting state
+    try {
+      await axios.delete(`/api/exam-schedules/${id}`);
+      fetchExamSchedules(); // Refresh schedule list
+      toast.success("Exam schedule deleted successfully!", {
+        className: "bg-primary-800 text-white rounded-3xl",
+      });
+    } catch (error) {
+      console.error("Error deleting exam schedule:", error);
+      toast.error("Failed to delete exam schedule.", {
+        className: "bg-primary-600 text-white rounded-3xl",
+      });
+    } finally {
+      setIsDeleting(false); // Reset deleting state
+    }
+  };
   const deleteQuestion = async (id) => {
     setIsDeleting(true); // Set loading to true
     try {
@@ -182,7 +184,33 @@ const AdminQuestionsPage = () => {
         className: 'bg-primary-600 text-white rounded-3xl',
       });
     } finally {
-      setIsDeleting(false) // Reset loading to false
+      setIsDeleting(false)
+    }
+  }
+
+  const handleActivateExam = async (id) => {
+    try {
+      setIsActivating(true);
+      const response = await axios.put(`/api/exam-schedule-activate`, {id : id});
+      toast.success("Exam Activated successfully", { icons: <SuccessIcon /> });
+      setIsActivating(false);
+      fetchExamSchedules();
+    } catch (error) {
+      toast.error("Error activating exam");
+      setIsActivating(false);
+    }
+  }
+
+  const handleDeactivateExam = async (id) => {
+    try {
+      setIsActivating(true);
+      const response = await axios.put(`/api/exam-schedule-deactivate`, {id: id});
+      toast.success("Exam Deactivated successfully", { icons: <SuccessIcon /> });
+      setIsActivating(false);
+      fetchExamSchedules();
+    } catch (error) {
+      toast.error("Error deactivating exam");
+      setIsActivating(false);
     }
   }
 
@@ -268,6 +296,7 @@ const AdminQuestionsPage = () => {
                         <TableHead>Exam Name</TableHead>
                         <TableHead>Start Time</TableHead>
                         <TableHead>End Time</TableHead>
+                        <TableHead>Is Active</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -295,7 +324,7 @@ const AdminQuestionsPage = () => {
                                 onChange={handleScheduleInputChange}
                               />
                             ) : (
-                                `${schedule?.start_time.split("T")[0]}, ${schedule?.start_time.split("T")[1].slice(0, 8)}`
+                              `${schedule?.start_time.split("T")[0]}, ${schedule?.start_time.split("T")[1].slice(0, 8)}`
                             )}
                           </TableCell>
                           <TableCell>
@@ -307,8 +336,20 @@ const AdminQuestionsPage = () => {
                                 onChange={handleScheduleInputChange}
                               />
                             ) : (
-                                `${schedule?.end_time.split("T")[0]}, ${schedule?.end_time.split("T")[1].slice(0, 8)}`
+                              `${schedule?.end_time.split("T")[0]}, ${schedule?.end_time.split("T")[1].slice(0, 8)}`
                             )}
+                          </TableCell>
+                          <TableCell>
+                            {/* {editingScheduleId === schedule.id ? (
+                              <Input
+                                type="datetime-local"
+                                name="end_time"
+                                value={editedScheduleData.is_active || ""}
+                                onChange={handleScheduleInputChange}
+                              />
+                            ) : ( */}
+                            {schedule.is_active ? "True" : "False"}
+                            {/* )} */}
                           </TableCell>
                           <TableCell className="text-right">
                             {editingScheduleId === schedule.id ? (
@@ -348,17 +389,46 @@ const AdminQuestionsPage = () => {
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button
-                                        variant="destructive"
-                                        size="icon"
-                                        onClick={() => deleteExamSchedule(schedule.id)}
-                                        disabled={isDeleting} // Disable delete button when deleting
-                                      >
-                                        {isDeleting ? (
-                                            <Loader2 className="animate-spin h-4 w-4" />
-                                        ) : (
-                                          <Trash2 className="h-4 w-4" />
-                                        )}
+                                  variant="outline"
+                                  size="icon"
+                                  className="mr-2"
+                                  title={`${schedule.is_active ? "Deactivate" : "Activate"}`}
+                                  onClick={() => {
+                                    if (schedule.is_active) {
+                                      handleDeactivateExam(schedule.id);
+                                    } else {
+                                      handleActivateExam(schedule.id);
+                                    }
+                                  }}
+                                >
+                                  {schedule.is_active
+                                    ? isActivating
+                                      ?
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      :
+                                      <CircleX className="h-4 w-4" />
+
+                                    : isActivating
+                                      ?
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      :
+                                      <CircleCheckBig className="h-4 w-4" />
+
+                                  }
                                 </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => deleteExamSchedule(schedule.id)}
+                                  disabled={isDeleting} // Disable delete button when deleting
+                                >
+                                  {isDeleting ? (
+                                    <Loader2 className="animate-spin h-4 w-4" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+
                               </>
                             )}
                           </TableCell>
