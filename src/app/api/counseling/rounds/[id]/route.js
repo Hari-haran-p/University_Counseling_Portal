@@ -44,3 +44,35 @@ export async function PUT(req, {params}) {
         }
     }
 }
+
+export async function POST(req, { params }) {
+    const { id } = params;
+  
+    try {
+      const body = await req.json();
+      const { start_date, end_date } = body;
+  
+      if (!start_date || !end_date) {
+        return NextResponse.json({ message: "Start date and end date are required" }, { status: 400 });
+      }
+  
+      // Validate date order
+      if (new Date(start_date) > new Date(end_date)) {
+        return NextResponse.json({ message: "Start date cannot be after end date" }, { status: 400 });
+      }
+  
+      const query = "UPDATE counseling_rounds SET start_date = $1, end_date = $2 WHERE id = $3 RETURNING *";
+      const values = [start_date, end_date, id];
+      const result = await pool.query(query, values);
+  
+      if (result.rowCount === 0) {
+        return NextResponse.json({ message: "Counseling round not found" }, { status: 404 });
+      }
+  
+      return NextResponse.json(result.rows[0], { status: 201 });  // Or 200 if you prefer
+  
+    } catch (error) {
+      console.error("Error updating counseling round:", error);
+      return NextResponse.json({ message: "Failed to update counseling round", error: error.message }, { status: 500 });
+    }
+  }

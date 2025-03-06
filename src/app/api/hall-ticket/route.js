@@ -31,14 +31,23 @@ export async function GET(req) {
 
     // 2. Fetch Personal Details and Photo Filename
     const detailsQuery = `
-          SELECT pd.name, pd.email, dd.photo_filename
-          FROM personal_details pd
-          LEFT JOIN declaration_details dd ON pd.user_id = dd.user_id
-          WHERE pd.user_id = $1
-        `;
+    SELECT dd.photo_path
+    FROM declaration_details dd
+    WHERE dd.user_id = $1
+  `;
     const detailsValues = [userId];
     const detailsResult = await client.query(detailsQuery, detailsValues);
     const details = detailsResult.rows[0] || {};
+
+    const personalQuery = `
+SELECT dd.name, dd.email, dd.gender, dd.dob
+FROM personal_details dd
+WHERE dd.user_id = $1
+`;
+
+    const personalValues = [userId];
+    const personalResult = await client.query(personalQuery, personalValues);
+    const personal = personalResult.rows[0] || {};
 
     // 3. Fetch Nearest *ACTIVE* Exam Schedule
     const scheduleQuery = `
@@ -71,7 +80,7 @@ export async function GET(req) {
     // --- User Photo ---
     if (details.photo_filename) {
       try {
-        const imagePath = path.join(process.cwd(), 'public', 'uploads', details.photo_filename); // Correct path
+        const imagePath = path.join(process.cwd(), 'public', 'uploads', details.photo_path); // Correct path
         // console.log("Image Path:", imagePath); // Debugging line
         const imgData = fs.readFileSync(imagePath, 'base64'); // Read as base64
         //Helper function to getMimeType
@@ -92,13 +101,13 @@ export async function GET(req) {
     doc.setFontSize(12);
     let yOffset = 50;
 
-    doc.text(`User ID: ${user.id}`, 20, yOffset);
+    // doc.text(`User ID: ${user.id}`, 20, yOffset);
+    // yOffset += 10;
+    // doc.text(`Username: ${user.username}`, 20, yOffset);
+    // yOffset += 10;
+    doc.text(`Name: ${personal.name || "N/A"}`, 20, yOffset);
     yOffset += 10;
-    doc.text(`Username: ${user.username}`, 20, yOffset);
-    yOffset += 10;
-    doc.text(`Name: ${details.name || "N/A"}`, 20, yOffset);
-    yOffset += 10;
-    doc.text(`Email: ${details.email || "N/A"}`, 20, yOffset);
+    doc.text(`Email: ${personal.email || "N/A"}`, 20, yOffset);
     yOffset += 15;
 
     // --- Exam Details ---

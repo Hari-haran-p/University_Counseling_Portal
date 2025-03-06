@@ -11,14 +11,14 @@ export async function GET() {
         const result = await client.query(query);
 
         //Format the start_time and the end_time
-        const examSchedules = result.rows.map(schedule => ({
-            ...schedule,
-            start_time: schedule.start_time ? new Date(schedule.start_time) : null,
-            end_time: schedule.end_time ? new Date(schedule.end_time) : null,
-        }))
-        console.log(examSchedules);
+        // const examSchedules = result.rows.map(schedule => ({
+        //     ...schedule,
+        //     start_time: schedule.start_time ? new Date(schedule.start_time) : null,
+        //     end_time: schedule.end_time ? new Date(schedule.end_time) : null,
+        // }))
+        console.log(result.rows);
         
-        return NextResponse.json(examSchedules, { status: 200 });
+        return NextResponse.json(result.rows, { status: 200 });
     } catch (error) {
         console.error("Error fetching exam schedules:", error);
         return NextResponse.json({ message: "Error fetching exam schedules" }, { status: 500 });

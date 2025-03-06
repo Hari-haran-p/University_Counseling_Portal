@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   "/registration",
   "/api/registration",
   "/api/logout",
+  "/api/admin/notification"
 ];
 
 const SECRET_KEY = new TextEncoder().encode(

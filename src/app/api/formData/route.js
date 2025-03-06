@@ -15,7 +15,7 @@ export async function GET(req) {
       }
 
       const client = await pool.connect();
-
+      
       const query = "SELECT step, data FROM form_data WHERE user_id = $1";
       const values = [userId];
       const result = await client.query(query, values);
