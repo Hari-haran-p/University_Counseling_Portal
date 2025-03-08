@@ -62,6 +62,14 @@ export async function POST(req) {
             try {
                 // Allocation Logic - Go through students and assign seats according to preference
                 for (const student of studentData) {
+
+                    const alreadyAllottedQuery = `SELECT id FROM assigned_seats WHERE user_id = $1`;
+                    const alreadyAllottedResult = await client.query(alreadyAllottedQuery, [student.user_id]);
+                    if (alreadyAllottedResult.rows.length > 0) {
+                        console.log(`User ${student.user_id} already has a seat allocated in this round. Skipping.`);
+                        continue; // Skip to the next student
+                    }
+
                     const preferences = [
                         student.preference_1,
                         student.preference_2,

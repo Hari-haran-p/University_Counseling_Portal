@@ -6,6 +6,11 @@ export async function GET() {
     let client;
     try {
         client = await pool.connect();
+
+        const roundQuery = `SELECT round_number FROM counseling_rounds WHERE is_active = true`;
+
+        const roundResult = await client.query(roundQuery);
+
         const query = `
             SELECT
                 ed.id as department_id,
@@ -14,9 +19,12 @@ export async function GET() {
                 av.seats_available
             FROM
                 seat_allocations av
-            JOIN engineering_departments ed ON av.department_id = ed.id;
+            JOIN engineering_departments ed ON av.department_id = ed.id
+            WHERE av.counseling_round_id = $1;
         `;
-        const result = await client.query(query);
+// console.log(roundResult);
+
+        const result = await client.query(query, [roundResult.rows[0].round_number]);
 
         return NextResponse.json(result.rows, { status: 200 });
     } catch (error) {

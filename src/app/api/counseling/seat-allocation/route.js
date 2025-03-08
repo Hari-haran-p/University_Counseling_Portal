@@ -21,13 +21,19 @@ export async function POST(req) {
     let client;
     try {
       client = await pool.connect();
+
+      const roundQuery = `SELECT round_number FROM counseling_rounds WHERE is_active = true`;
+
+      const roundResult = await client.query(roundQuery);
+
+
       const query = `
-        INSERT INTO seat_allocations (department_id, community, seats_available)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (department_id, community) DO UPDATE
+        INSERT INTO seat_allocations (department_id, community, seats_available, counseling_round_id)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (department_id, community, counseling_round_id) DO UPDATE
         SET seats_available = $3;
       `;
-      const values = [departmentId, community, seatsAvailable];
+      const values = [departmentId, community, seatsAvailable, roundResult.rows[0].round_number];
       await client.query(query, values);
 
       return NextResponse.json({ message: "Seat allocation saved successfully" }, { status: 200 });

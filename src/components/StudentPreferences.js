@@ -23,13 +23,20 @@ const StudentPreferences = () => {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const [departmentsResponse, datesResponse, preferencesResponse] = await Promise.all([
+                const [departmentsResponse, datesResponse, preferencesResponse, seatAllotmentResponse] = await Promise.all([
                     axios.get("/api/counseling/departments"),
                     axios.get("/api/get-preference-dates"),
                     axios.get(`/api/counseling/student-preferences`),
+                    axios.get("/api/get-seat-allotment")
                 ]);
 
                 setDepartments(departmentsResponse.data);
+                
+                if(seatAllotmentResponse.data && seatAllotmentResponse.data.status === true){
+                    setPreferencesEnabled(false);
+                    setMessage("Seat already allocated and you cannot post preference for this round");
+                    return;
+                }
 
                 // Date check - same as before, but now inside this combined useEffect
                 if (datesResponse.data && datesResponse.data.length > 0) {

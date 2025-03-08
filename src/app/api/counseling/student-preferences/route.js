@@ -27,7 +27,7 @@ export async function POST(req) {
             const activeRoundId = activeRoundResult.rows[0].id;
 
             // 2. Get preference start and end dates from the dates table
-            const dateQuery = "SELECT preference_start_date, preference_end_date FROM dates WHERE id = 1";
+            const dateQuery = "SELECT start_date as preference_start_date, end_date as preference_end_date FROM counseling_rounds WHERE is_active = true";
             const dateResult = await client.query(dateQuery);
 
             if (dateResult.rows.length === 0) {
