@@ -7,7 +7,7 @@ export async function GET() {
     try {
         client = await pool.connect();
 
-        const roundQuery = `SELECT round_number FROM counseling_rounds WHERE is_active = true`;
+        const roundQuery = `SELECT id FROM counseling_rounds WHERE is_active = true`;
 
         const roundResult = await client.query(roundQuery);
 
@@ -24,7 +24,7 @@ export async function GET() {
         `;
 // console.log(roundResult);
 
-        const result = await client.query(query, [roundResult.rows[0].round_number]);
+        const result = await client.query(query, [roundResult.rows[0].id]);
 
         return NextResponse.json(result.rows, { status: 200 });
     } catch (error) {

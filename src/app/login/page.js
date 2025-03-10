@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
+import Chatbot from "@/components/Chatsbot";
+
 
 export default function LoginPage() {
 
@@ -108,6 +110,9 @@ export default function LoginPage() {
           </Button>
           <a className="text-sm w-full mt-3 underline text-blue-700" href="/registration">New user ? Click here to signup !!</a>
         </form>
+      </div>
+      <div className="fixed bottom-5 right-5 z-50">
+        <Chatbot />
       </div>
     </div>
   );

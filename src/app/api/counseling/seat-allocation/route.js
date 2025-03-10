@@ -22,7 +22,7 @@ export async function POST(req) {
     try {
       client = await pool.connect();
 
-      const roundQuery = `SELECT round_number FROM counseling_rounds WHERE is_active = true`;
+      const roundQuery = `SELECT id, round_number FROM counseling_rounds WHERE is_active = true`;
 
       const roundResult = await client.query(roundQuery);
 
@@ -33,7 +33,7 @@ export async function POST(req) {
         ON CONFLICT (department_id, community, counseling_round_id) DO UPDATE
         SET seats_available = $3;
       `;
-      const values = [departmentId, community, seatsAvailable, roundResult.rows[0].round_number];
+      const values = [departmentId, community, seatsAvailable, roundResult.rows[0].id];
       await client.query(query, values);
 
       return NextResponse.json({ message: "Seat allocation saved successfully" }, { status: 200 });
