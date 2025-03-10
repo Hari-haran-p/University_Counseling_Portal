@@ -78,13 +78,13 @@ WHERE dd.user_id = $1
     doc.line(20, 35, 190, 35);
 
     // --- User Photo ---
-    if (details.photo_filename) {
+    if (details.photo_path) {
       try {
         const imagePath = path.join(process.cwd(), 'public', 'uploads', details.photo_path); // Correct path
         // console.log("Image Path:", imagePath); // Debugging line
         const imgData = fs.readFileSync(imagePath, 'base64'); // Read as base64
         //Helper function to getMimeType
-        const mimeType = getMimeType(details.photo_filename);
+        const mimeType = getMimeType(details.photo_path);
         if (!mimeType) {
           throw new Error('Unsupported image format');
         }
