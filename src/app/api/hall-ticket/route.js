@@ -88,8 +88,10 @@ WHERE dd.user_id = $1
         if (!mimeType) {
           throw new Error('Unsupported image format');
         }
+        const pageWidth = doc.internal.pageSize.width;
 
-        doc.addImage(`data:${mimeType};base64,${imgData}`, 30, 40, 40, 40); // Add image, adjust position/size
+
+        doc.addImage(`data:${mimeType};base64,${imgData}`, pageWidth - 50, 40, 40, 40);
       } catch (imageError) {
         console.error("Error loading image:", imageError);
         // Optionally, add a placeholder image or text if the image fails to load
