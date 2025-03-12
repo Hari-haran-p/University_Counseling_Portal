@@ -453,13 +453,21 @@ const AdminApplicationPage = () => {
                         .filter((column) => columnVisibility[column])
                         .map((column) => {
                           if (tableColumns.includes(column)) {
-
+                            if (column == 'dob') {
+                              return (
+                                <TableCell
+                                  key={`${user.user_id}-${column}`}
+                                  className="whitespace-nowrap"
+                                >
+                                  {user[column]?.split("T")[0]}
+                                </TableCell>
+                              )
+                            }
                             return (
                               <TableCell
                                 key={`${user.user_id}-${column}`}
                                 className="whitespace-nowrap"
                               >
-
                                 {user[column]}
                               </TableCell>
                             )
@@ -484,13 +492,22 @@ const AdminApplicationPage = () => {
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 {allColumnNames.map((column) => {
                                   console.log(user);
-                                  
+                                  if (column != 'dob') {
+                                    return (
+                                      <div key={column} className="space-y-1">
+                                        <Label className="font-semibold ">
+                                          {formatColumnHeader(column)}
+                                        </Label>
+                                        <p>{user[column]}</p>
+                                      </div>
+                                    )
+                                  }
                                   return (
                                     <div key={column} className="space-y-1">
-                                      <Label className="font-medium">
+                                      <Label className="font-semibold ">
                                         {formatColumnHeader(column)}
                                       </Label>
-                                      <p>{user[column]}</p>
+                                      <p>{user[column].split("T")[0]}</p>
                                     </div>
                                   )
 

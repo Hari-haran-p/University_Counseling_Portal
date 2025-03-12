@@ -10,6 +10,10 @@ export async function GET() {
         const roundQuery = `SELECT id FROM counseling_rounds WHERE is_active = true`;
 
         const roundResult = await client.query(roundQuery);
+        
+        if (roundResult.rows.length === 0) {            
+            return NextResponse.json({message: "No active round found"}, { status: 404 });
+        }
 
         const query = `
             SELECT
@@ -22,7 +26,7 @@ export async function GET() {
             JOIN engineering_departments ed ON av.department_id = ed.id
             WHERE av.counseling_round_id = $1;
         `;
-// console.log(roundResult);
+
 
         const result = await client.query(query, [roundResult.rows[0].id]);
 

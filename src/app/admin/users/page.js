@@ -324,14 +324,26 @@ const AdminUsersPage = () => {
                                 <DialogTitle>User Details</DialogTitle>
                               </DialogHeader>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                {allColumnNames.map((column) => (
-                                  <div key={column} className="space-y-1">
-                                    <Label className="font-medium">
-                                      {formatColumnHeader(column)}
-                                    </Label>
-                                    <p>{user[column]}</p>
-                                  </div>
-                                ))}
+                                {allColumnNames.map((column) => {
+                                  if (column != "dob") {
+                                    return (
+                                      <div key={column} className="space-y-1">
+                                        <Label className="font-medium">
+                                          {formatColumnHeader(column)}
+                                        </Label>
+                                        <p>{user[column]}</p>
+                                      </div>
+                                    )
+                                  }
+                                  return (
+                                    <div key={column} className="space-y-1">
+                                      <Label className="font-medium">
+                                        {formatColumnHeader(column)}
+                                      </Label>
+                                      <p>{user[column]?.split("T")[0]}</p>
+                                    </div>
+                                  )
+                                })}
                               </div>
                             </DialogContent>
                           </Dialog>

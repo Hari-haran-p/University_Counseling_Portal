@@ -80,11 +80,10 @@ const StudentPreferences = () => {
                     ]);
                 }
 
-
             } catch (error) {
                 console.error("Error fetching data:", error);
                 setPreferencesEnabled(false);
-                setMessage("Failed to load data. Please try again.");
+                setMessage(error?.response?.data?.message || "Failed to load data. Please try again.");
             } finally {
                 setIsLoading(false);
             }

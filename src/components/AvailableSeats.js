@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
+import { toast } from "react-fox-toast";
 
 const AvailableSeats = () => {
   const [availableSeats, setAvailableSeats] = useState([]);
@@ -28,7 +29,7 @@ const AvailableSeats = () => {
       setAvailableSeats(response.data);
     } catch (error) {
       console.error("Error fetching available seats:", error);
-      alert("Failed to load available seats.");
+      toast.error(error?.response?.data?.message || "Failed to load available seats.");
     } finally {
       setIsLoading(false);
     }
