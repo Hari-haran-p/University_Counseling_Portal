@@ -181,7 +181,7 @@ const Chatbot = () => {
         {isOpen ? (
           <X size={24} />
         ) : (
-          <MessageCircle size={24} />
+          <MessageCircle className="" size={24} />
         )}
       </button>
 
@@ -224,7 +224,7 @@ const Chatbot = () => {
             </button>
           )}
 
-          <div className="chatbot-options-container">
+          <div className="chatbot-options-container ">
             <div className="chatbot-options">
               {!isTyping &&
                 currentOptions.map((option) => (
