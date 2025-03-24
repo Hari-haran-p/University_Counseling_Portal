@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { LogOut, Menu, Search,UserRound } from "lucide-react"
+import { LogOut, Menu, Search, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import axios from "axios"
 import { NotificationPanel } from "./NotificationPanel"
+import Chatbot from "./Chatsbot"
 
 export default function Layout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -90,8 +91,7 @@ export default function Layout({ children }) {
         className={`
           md:flex w-${sidebarWidth} flex-col bg-primary-800 text-white
           fixed top-0 left-0 h-full z-50
-          transition-transform duration-300 transform ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          transition-transform duration-300 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0
         `}
       >
@@ -135,7 +135,7 @@ export default function Layout({ children }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <UserRound className="h-5 w-5" />
+                    <UserRound className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -153,7 +153,12 @@ export default function Layout({ children }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4">
+          {children}
+          <div className="fixed bottom-5 right-5 z-50">
+            <Chatbot />
+          </div>
+        </main>
       </div>
     </div>
   )

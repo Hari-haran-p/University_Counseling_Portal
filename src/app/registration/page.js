@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-fox-toast"; 
+import { toast } from "react-fox-toast";
 import "react-toastify/dist/ReactToastify.css"; // Still needed for base styles
 import axios from "axios";
 import { registrationSchema } from "@/app/validators/registration";
@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import Chatbot from "@/components/Chatsbot";
 
 export default function RegistrationPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
         dob: "",
-        gender: "male", 
+        gender: "male",
         mobile: "",
         email: "",
     });
@@ -46,20 +47,20 @@ export default function RegistrationPage() {
                 });
                 router.push("/login");
             } else {
-               toast.error(response.data.message || "Registration failed. Please try again.",{
-                className: 'bg-primary-600 text-white rounded-3xl',
-               });
+                toast.error(response.data.message || "Registration failed. Please try again.", {
+                    className: 'bg-primary-600 text-white rounded-3xl',
+                });
             }
         } catch (error) {
             if (error.name === "ZodError") {
                 // Handle Zod validation errors
                 const firstErrorMessage = error.errors[0].message;
-                 toast.error(firstErrorMessage,{
+                toast.error(firstErrorMessage, {
                     className: 'bg-primary-600 text-white rounded-3xl',
-                 });
+                });
 
             } else {
-                toast.error(error.response?.data?.message || "An error occurred during registration.",{
+                toast.error(error.response?.data?.message || "An error occurred during registration.", {
                     className: 'bg-primary-600 text-white rounded-3xl',
                 });
 
@@ -130,7 +131,7 @@ export default function RegistrationPage() {
                         className="w-full mb-9 bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center"
                         disabled={isLoading}
                     >
-                       {isLoading ? (
+                        {isLoading ? (
                             <ClipLoader color="#ffffff" size={20} />
                         ) : (
                             "Register"
@@ -138,6 +139,9 @@ export default function RegistrationPage() {
                     </Button>
                     <a className="text-sm w-full mt-3 underline text-blue-700" href="/login">Already user ? Click here to signin !!</a>
                 </form>
+            </div>
+            <div className="fixed bottom-5 right-5 z-50">
+                <Chatbot />
             </div>
         </div>
     );

@@ -491,7 +491,6 @@ const AdminApplicationPage = () => {
                               </DialogHeader>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 {allColumnNames.map((column) => {
-                                  console.log(user);
                                   if (column != 'dob') {
                                     return (
                                       <div key={column} className="space-y-1">
@@ -507,7 +506,7 @@ const AdminApplicationPage = () => {
                                       <Label className="font-semibold ">
                                         {formatColumnHeader(column)}
                                       </Label>
-                                      <p>{user[column].split("T")[0]}</p>
+                                      <p>{user[column]?.split("T")[0]}</p>
                                     </div>
                                   )
 
