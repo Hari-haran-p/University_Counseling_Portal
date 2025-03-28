@@ -3,6 +3,7 @@ import { jwtVerify } from "jose";
 import { parse, serialize } from "cookie";
 
 const PUBLIC_ROUTES = [
+  "/bg.mp4",
   "/login",
   "/api/login",
   "/registration",

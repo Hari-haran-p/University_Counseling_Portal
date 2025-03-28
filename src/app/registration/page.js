@@ -73,7 +73,16 @@ export default function RegistrationPage() {
 
     return (
         <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
+            <video
+                className="absolute top-0 left-0 w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                src="/bg.mp4"
+            ></video>
+
+            <div className="w-full max-w-md p-8 space-y-6  bg-white/80 backdrop-blur-sm rounded-lg shadow-lg">
                 <h1 className="text-3xl font-bold text-center text-primary-700">Register</h1>
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="space-y-2">
