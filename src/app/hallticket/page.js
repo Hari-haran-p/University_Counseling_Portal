@@ -12,7 +12,12 @@ const HallTicketPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null); 
-  const user = JSON.parse(Cookies.get("userData"));    
+  const [user, setUser] = useState(null); // Initialize user as null
+  // const user = JSON.parse(Cookies.get("userData"));   
+  
+  useEffect(()=>{
+    setUser(Cookies.get("userData"));
+  }, [])
 
   const generateHallTicket = async () => {
     setIsLoading(true);
