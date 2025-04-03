@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -16,13 +16,14 @@ const HallTicketPage = () => {
   // const user = JSON.parse(Cookies.get("userData"));   
   
   useEffect(()=>{
-    setUser(Cookies.get("userData"));
-  }, [])
+    const data = Cookies.get("userData")    
+    setUser(JSON.parse(data));
+  }, [])  
 
   const generateHallTicket = async () => {
     setIsLoading(true);
     setErrorMessage(null); // Clear any previous error messages
-    try {
+    try {      
       const response = await axios.get(`/api/hall-ticket?userId=${parseInt(user.id)}`);
 
       if (response.data && response.data.hallTicketData) {
